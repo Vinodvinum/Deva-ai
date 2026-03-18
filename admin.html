@@ -16,14 +16,14 @@
   --red:#8b2020;--redl:#e87d94;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;overflow:hidden}
+html,body{height:100%;overflow:hidden;overflow-x:hidden}
 body{background:var(--dp);color:var(--tx);font-family:'EB Garamond',serif;font-size:15px}
 
 .bg{position:fixed;inset:0;pointer-events:none;z-index:0}
 .bg::before{content:'';position:absolute;inset:0;
   background:radial-gradient(ellipse 60% 40% at 50% -10%,rgba(232,114,12,.12) 0%,transparent 60%)}
 
-#shell{display:flex;height:100vh;position:relative;z-index:1}
+#shell{display:flex;height:100dvh;position:relative;z-index:1;width:100%;max-width:100%;overflow:hidden}
 
 /* ── SIDEBAR ── */
 #aside{
@@ -72,8 +72,13 @@ body{background:var(--dp);color:var(--tx);font-family:'EB Garamond',serif;font-s
   background:rgba(5,3,10,.7);border-bottom:1px solid var(--br);
   backdrop-filter:blur(12px);
 }
+.tb-left{display:flex;align-items:center;gap:10px;min-width:0}
 .tb-title{font-family:'Cinzel',serif;font-size:12px;letter-spacing:3px;color:var(--gdl);text-transform:uppercase}
 .tb-right{display:flex;align-items:center;gap:10px}
+.aside-toggle{
+  display:none;background:none;border:1px solid var(--br);color:var(--dm);
+  width:32px;height:32px;border-radius:4px;cursor:pointer;font-size:16px;line-height:1;
+}
 .tb-btn{background:none;border:1px solid var(--br);color:var(--dm);font-family:'Cinzel',serif;font-size:8px;letter-spacing:1.5px;padding:6px 12px;cursor:pointer;text-transform:uppercase;transition:all .2s;border-radius:3px}
 .tb-btn:hover{border-color:var(--gdl);color:var(--gdl)}
 .tb-btn.primary{border-color:var(--sf);color:var(--sfl);background:var(--sfd)}
@@ -123,8 +128,8 @@ body{background:var(--dp);color:var(--tx);font-family:'EB Garamond',serif;font-s
 .dl-val{margin-left:auto;font-family:'Cinzel',serif;font-size:9px;color:var(--gdl)}
 
 /* ── TABLES ── */
-.tbl-wrap{background:var(--pn);border:1px solid var(--br);margin-bottom:24px;overflow:hidden}
-table{width:100%;border-collapse:collapse;font-size:14px}
+.tbl-wrap{background:var(--pn);border:1px solid var(--br);margin-bottom:24px;overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:720px}
 thead tr{background:rgba(232,114,12,.05);border-bottom:1px solid var(--br)}
 th{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--gd);text-transform:uppercase;padding:11px 14px;text-align:left}
 td{padding:10px 14px;border-bottom:1px solid rgba(232,114,12,.05);color:var(--tx);vertical-align:middle}
@@ -212,6 +217,32 @@ tr:hover td{background:rgba(232,114,12,.03)}
 .search-inp{flex:1;min-width:200px;background:var(--dk);border:1px solid var(--br);color:var(--tx);font-family:'EB Garamond',serif;font-size:14px;padding:8px 12px;outline:none;border-radius:2px;transition:border-color .2s}
 .search-inp:focus{border-color:var(--sf)}
 .filter-sel{background:var(--dk);border:1px solid var(--br);color:var(--dm);font-family:'Cinzel',serif;font-size:9px;padding:8px 12px;outline:none;border-radius:2px;letter-spacing:1px;cursor:pointer}
+
+.aside-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:40}
+.aside-overlay.show{display:block}
+
+@media(max-width:960px){
+  #aside{
+    position:fixed;left:0;top:0;bottom:0;z-index:50;
+    transform:translateX(-100%);transition:transform .25s ease;
+    width:min(84vw,280px);
+  }
+  #aside.open{transform:translateX(0)}
+  .aside-toggle{display:inline-flex;align-items:center;justify-content:center}
+  .topbar{height:auto;padding:10px 12px;gap:10px;align-items:flex-start}
+  .tb-left{flex:1}
+  .tb-title{font-size:10px;letter-spacing:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tb-right{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .tb-btn{padding:8px 10px}
+  .page{padding:16px 12px}
+  .stats-row{grid-template-columns:1fr}
+  .search-bar{flex-direction:column}
+  .search-inp,.filter-sel{width:100%;min-width:0}
+}
+
+@media(max-width:520px){
+  .tb-right{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
@@ -244,7 +275,7 @@ tr:hover td{background:rgba(232,114,12,.03)}
   <div class="aside-section">Config</div>
   <div class="aside-nav">
     <button class="aside-btn" onclick="showPage('settings',this)"><span class="ai">⚙️</span>Settings</button>
-    <button class="aside-btn" onclick="window.open('app.html','_blank')"><span class="ai">🪔</span>Open App</button>
+    <button class="aside-btn" onclick="window.open('/app','_blank')"><span class="ai">🪔</span>Open App</button>
   </div>
 
   <div class="aside-footer">
@@ -258,9 +289,13 @@ tr:hover td{background:rgba(232,114,12,.03)}
 </div>
 
 <!-- ── MAIN ── -->
+<div class="aside-overlay" id="aside-overlay" onclick="closeAside()"></div>
 <div id="main">
   <div class="topbar">
-    <div class="tb-title" id="tb-title">Dashboard</div>
+    <div class="tb-left">
+      <button class="aside-toggle" onclick="toggleAside()">&#9776;</button>
+      <div class="tb-title" id="tb-title">Dashboard</div>
+    </div>
     <div class="tb-right">
       <button class="tb-btn" onclick="refreshData()">↻ Refresh</button>
       <button class="tb-btn primary" onclick="showPage('scriptures',null)">+ Add Scripture</button>
@@ -527,7 +562,7 @@ tr:hover td{background:rgba(232,114,12,.03)}
           <div class="toggle" id="tgl-maintenance" onclick="toggleSetting(this,'maintenance')"></div>
           <div class="toggle-label">Maintenance mode</div>
         </div>
-        <div class="setting-desc" style="font-size:12px;margin:0">App URL: <strong style="color:var(--gdl)">app.html</strong></div>
+        <div class="setting-desc" style="font-size:12px;margin:0">App URL: <strong style="color:var(--gdl)">/app</strong></div>
       </div>
     </div>
 
@@ -603,15 +638,142 @@ tr:hover td{background:rgba(232,114,12,.03)}
 let currentUser = null;
 let editingEmail = null;
 let firestoreCtx = null;
+let firebaseRuntime = null;
+let publicConfig = null;
+
+function getStoredCurrentUser() {
+  try {
+    const raw = localStorage.getItem('deva_current_user');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    return parsed;
+  } catch {
+    localStorage.removeItem('deva_current_user');
+    return null;
+  }
+}
+
+function waitForFirebaseUser(auth, onAuthStateChanged, timeoutMs = 4000) {
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = (user) => {
+      if (done) return;
+      done = true;
+      resolve(user || null);
+    };
+    const unsub = onAuthStateChanged(auth, (user) => {
+      try { unsub(); } catch {}
+      finish(user);
+    }, () => finish(null));
+    setTimeout(() => {
+      try { unsub(); } catch {}
+      finish(auth.currentUser || null);
+    }, timeoutMs);
+  });
+}
+
+async function getFirebaseRuntime() {
+  if (firebaseRuntime) return firebaseRuntime;
+
+  const cfgResp = await fetch('/api/public-config', { cache: 'no-store' });
+  const cfgData = await cfgResp.json().catch(() => ({}));
+  if (!cfgResp.ok) throw new Error(cfgData.error || 'Failed to load config.');
+  publicConfig = cfgData;
+
+  const appMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+  const authMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+  const fsMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+
+  const app = appMod.getApps().length
+    ? appMod.getApps()[0]
+    : appMod.initializeApp(cfgData.firebaseConfig || {});
+  const auth = authMod.getAuth(app);
+  const db = fsMod.getFirestore(app);
+
+  firebaseRuntime = {
+    app,
+    auth,
+    db,
+    onAuthStateChanged: authMod.onAuthStateChanged,
+    signOut: authMod.signOut,
+    collection: fsMod.collection,
+    getDocs: fsMod.getDocs,
+    doc: fsMod.doc,
+    getDoc: fsMod.getDoc,
+    setDoc: fsMod.setDoc,
+    updateDoc: fsMod.updateDoc,
+    deleteDoc: fsMod.deleteDoc,
+    serverTimestamp: fsMod.serverTimestamp
+  };
+  return firebaseRuntime;
+}
+
+async function ensureAdminSession() {
+  const runtime = await getFirebaseRuntime();
+  const firebaseUser = await waitForFirebaseUser(runtime.auth, runtime.onAuthStateChanged);
+  if (!firebaseUser) return null;
+
+  const adminEmail = String(publicConfig?.adminEmail || 'admin@devaai.com').toLowerCase();
+  const userRef = runtime.doc(runtime.db, 'users', firebaseUser.uid);
+  let snap = await runtime.getDoc(userRef);
+
+  if (!snap.exists()) {
+    await runtime.setDoc(userRef, {
+      uid: firebaseUser.uid,
+      name: firebaseUser.displayName || 'User',
+      email: firebaseUser.email || '',
+      plan: 'free',
+      isAdmin: (firebaseUser.email || '').toLowerCase() === adminEmail,
+      status: 'active',
+      questionsToday: 0,
+      totalQuestions: 0,
+      lastQuestionDate: '',
+      joined: runtime.serverTimestamp(),
+      bookmarks: []
+    }, { merge: true });
+    snap = await runtime.getDoc(userRef);
+  }
+
+  const data = snap.exists() ? snap.data() : {};
+  const emailLower = (firebaseUser.email || '').toLowerCase();
+  const isAdmin = !!data.isAdmin || (emailLower && emailLower === adminEmail);
+
+  if (!data.isAdmin && emailLower && emailLower === adminEmail) {
+    try { await runtime.updateDoc(userRef, { isAdmin: true }); } catch {}
+  }
+
+  const sessionUser = {
+    uid: firebaseUser.uid,
+    name: firebaseUser.displayName || data.name || 'Admin',
+    email: firebaseUser.email || data.email || '',
+    plan: data.plan || 'free',
+    isAdmin,
+    photoURL: firebaseUser.photoURL || ''
+  };
+
+  localStorage.setItem('deva_current_user', JSON.stringify(sessionUser));
+  return sessionUser;
+}
 
 window.addEventListener('load', async () => {
-  currentUser = JSON.parse(localStorage.getItem('deva_current_user') || 'null');
-  if (!currentUser || !currentUser.isAdmin) {
-    window.location.href = 'index.html';
+  try {
+    currentUser = await ensureAdminSession();
+  } catch {
+    currentUser = getStoredCurrentUser();
+  }
+
+  if (!currentUser) {
+    window.location.href = '/';
     return;
   }
-  document.getElementById('admin-name').textContent = currentUser.name;
-  document.getElementById('admin-email').textContent = currentUser.email;
+  if (!currentUser.isAdmin) {
+    window.location.href = '/app';
+    return;
+  }
+
+  document.getElementById('admin-name').textContent = currentUser.name || 'Admin';
+  document.getElementById('admin-email').textContent = currentUser.email || '';
   await syncUsersFromFirestore();
   loadDashboard();
   loadSettings();
@@ -619,13 +781,9 @@ window.addEventListener('load', async () => {
 
 async function firebaseSignOutBestEffort() {
   try {
-    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
-    const { getAuth, signOut } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
-    const cfgResp = await fetch('/api/public-config', { cache: 'no-store' });
-    const cfgData = await cfgResp.json();
-    const app = getApps().length ? getApps()[0] : initializeApp(cfgData.firebaseConfig || {});
-    await signOut(getAuth(app));
-  } catch (err) {
+    const rt = await getFirebaseRuntime();
+    await rt.signOut(rt.auth);
+  } catch {
     // Continue local logout even if Firebase sign-out fails.
   }
 }
@@ -633,10 +791,26 @@ async function firebaseSignOutBestEffort() {
 async function logout() {
   await firebaseSignOutBestEffort();
   localStorage.removeItem('deva_current_user');
-  window.location.href = 'index.html';
+  window.location.href = '/';
 }
 
-// ── NAVIGATION ──
+function toggleAside() {
+  const aside = document.getElementById('aside');
+  const overlay = document.getElementById('aside-overlay');
+  if (!aside || !overlay) return;
+  aside.classList.toggle('open');
+  overlay.classList.toggle('show');
+}
+
+function closeAside() {
+  const aside = document.getElementById('aside');
+  const overlay = document.getElementById('aside-overlay');
+  if (!aside || !overlay) return;
+  aside.classList.remove('open');
+  overlay.classList.remove('show');
+}
+
+// Navigation
 function showPage(page, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('pg-' + page).classList.add('active');
@@ -650,6 +824,7 @@ function showPage(page, btn) {
   if (page === 'scriptures') loadVerses();
   if (page === 'queries') loadQueries();
   if (page === 'dashboard') loadDashboard();
+  closeAside();
 }
 
 // ── DASHBOARD ──
@@ -735,25 +910,16 @@ function normalizeFirestoreUser(data, fallbackUid) {
 
 async function initFirestoreAdmin() {
   if (firestoreCtx) return firestoreCtx;
-
-  const cfgResp = await fetch('/api/public-config', { cache: 'no-store' });
-  const cfg = await cfgResp.json();
-  if (!cfgResp.ok) throw new Error(cfg.error || 'Failed to load public config.');
-
-  const firebaseAppMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
-  const firestoreMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
-
-  const app = firebaseAppMod.getApps().length
-    ? firebaseAppMod.getApps()[0]
-    : firebaseAppMod.initializeApp(cfg.firebaseConfig || {});
-
+  const runtime = await getFirebaseRuntime();
+  const firebaseUser = await waitForFirebaseUser(runtime.auth, runtime.onAuthStateChanged, 3000);
+  if (!firebaseUser) throw new Error('Missing authenticated admin session.');
   firestoreCtx = {
-    db: firestoreMod.getFirestore(app),
-    collection: firestoreMod.collection,
-    getDocs: firestoreMod.getDocs,
-    doc: firestoreMod.doc,
-    updateDoc: firestoreMod.updateDoc,
-    deleteDoc: firestoreMod.deleteDoc
+    db: runtime.db,
+    collection: runtime.collection,
+    getDocs: runtime.getDocs,
+    doc: runtime.doc,
+    updateDoc: runtime.updateDoc,
+    deleteDoc: runtime.deleteDoc
   };
   return firestoreCtx;
 }
@@ -765,7 +931,8 @@ async function syncUsersFromFirestore() {
     const users = {};
     snap.forEach((d) => {
       const user = normalizeFirestoreUser(d.data(), d.id);
-      if (user.email) users[user.email] = user;
+      const key = user.email || user.uid || d.id;
+      users[key] = { ...user, _key: key };
     });
     localStorage.setItem('deva_users', JSON.stringify(users));
     return users;
@@ -788,23 +955,23 @@ async function deleteFirestoreUser(uid) {
 }
 
 function userRow(u) {
+  const rowKey = u._key || u.email || u.uid || '';
   const plan = u.plan || 'free';
-  const joined = u.joined ? new Date(u.joined).toLocaleDateString('en-IN') : '—';
+  const joined = u.joined ? new Date(u.joined).toLocaleDateString('en-IN') : '-';
   return `<tr>
-    <td class="td-name">${u.name||'—'}</td>
-    <td class="td-email">${u.email}</td>
+    <td class="td-name">${u.name||'-'}</td>
+    <td class="td-email">${u.email || '-'}</td>
     <td><span class="badge b-${plan}">${plan}</span></td>
     <td style="font-size:12px;color:var(--dm)">${joined}</td>
     <td style="font-family:'Cinzel',serif;font-size:11px;color:var(--gdl)">${u.totalQuestions||0}</td>
     <td>
       <div class="tbl-act">
-        <button class="ta-btn" onclick="editUser('${u.email}')">Edit</button>
-        <button class="ta-btn del" onclick="deleteUser('${u.email}')">Del</button>
+        <button class="ta-btn" onclick="editUser('${rowKey}')">Edit</button>
+        <button class="ta-btn del" onclick="deleteUser('${rowKey}')">Del</button>
       </div>
     </td>
   </tr>`;
 }
-
 // ── USERS ──
 let allUsers = [];
 async function loadUsers() {
@@ -820,25 +987,27 @@ function renderUsers(list) {
     return;
   }
   tb.innerHTML = list.map(u => {
+    const rowKey = u._key || u.email || u.uid || '';
     const plan = u.plan || 'free';
-    const joined = u.joined ? new Date(u.joined).toLocaleDateString('en-IN') : '—';
+    const status = u.status || 'active';
+    const statusBadge = status === 'active' ? 'b-active' : 'b-inactive';
+    const joined = u.joined ? new Date(u.joined).toLocaleDateString('en-IN') : '-';
     return `<tr>
-      <td class="td-name">${u.name||'—'}</td>
-      <td class="td-email">${u.email}</td>
+      <td class="td-name">${u.name||'-'}</td>
+      <td class="td-email">${u.email || '-'}</td>
       <td><span class="badge b-${plan}">${plan}</span></td>
       <td style="font-size:12px;color:var(--dm)">${joined}</td>
       <td style="font-family:'Cinzel',serif;color:var(--gdl)">${u.totalQuestions||0}</td>
-      <td><span class="badge b-active">Active</span></td>
+      <td><span class="badge ${statusBadge}">${status}</span></td>
       <td>
         <div class="tbl-act">
-          <button class="ta-btn" onclick="editUser('${u.email}')">Edit</button>
-          <button class="ta-btn del" onclick="deleteUser('${u.email}')">Del</button>
+          <button class="ta-btn" onclick="editUser('${rowKey}')">Edit</button>
+          <button class="ta-btn del" onclick="deleteUser('${rowKey}')">Del</button>
         </div>
       </td>
     </tr>`;
   }).join('');
 }
-
 function filterUsers(q) {
   const filtered = allUsers.filter(u =>
     u.name?.toLowerCase().includes(q.toLowerCase()) ||
@@ -852,10 +1021,10 @@ function filterByPlan(plan) {
   renderUsers(allUsers.filter(u => u.plan === plan));
 }
 
-function editUser(email) {
-  editingEmail = email;
+function editUser(key) {
+  editingEmail = key;
   const users = getUsers();
-  const u = users[email];
+  const u = users[key];
   if (!u) return;
   document.getElementById('edit-name').value = u.name || '';
   document.getElementById('edit-plan').value = u.plan || 'free';
@@ -892,11 +1061,12 @@ async function saveUserEdit() {
   showToast('✓ User updated');
 }
 
-async function deleteUser(email) {
-  if (!confirm(`Delete user ${email}? This cannot be undone.`)) return;
+async function deleteUser(key) {
   const users = getUsers();
-  const uid = users[email]?.uid || '';
-  delete users[email];
+  const label = users[key]?.email || key;
+  if (!confirm(`Delete user ${label}? This cannot be undone.`)) return;
+  const uid = users[key]?.uid || '';
+  delete users[key];
   localStorage.setItem('deva_users', JSON.stringify(users));
   try {
     if (uid) await deleteFirestoreUser(uid);
@@ -907,7 +1077,6 @@ async function deleteUser(email) {
   loadDashboard();
   showToast('User deleted');
 }
-
 function closeModal() {
   document.getElementById('user-modal').classList.remove('show');
 }
