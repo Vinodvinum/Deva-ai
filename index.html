@@ -12,14 +12,28 @@
 ═══════════════════════════════════════════ -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  async function getConfig() {
+    const CACHE_KEY = 'deva_cfg_v1';
+    const cached = sessionStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try { return JSON.parse(cached); } catch {}
+    }
+    const resp = await fetch('/api/public-config');
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to load runtime config.');
+    }
+    const data = await resp.json();
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    return data;
+  }
 
   window._firebaseReadyPromise = (async () => {
     try {
-      const cfgResp = await fetch('/api/public-config', { cache: 'no-store' });
-      const cfgData = await cfgResp.json().catch(() => ({}));
-      if (!cfgResp.ok) throw new Error(cfgData.error || 'Failed to load runtime config.');
+      const cfgData = await getConfig();
 
       const firebaseConfig = cfgData.firebaseConfig || {};
       if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId || !firebaseConfig.appId) {
@@ -40,14 +54,10 @@
       window._firebaseDb = db;
       window._googleProvider = googleProvider;
       window._firebaseFns = {
-        signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, createUserWithEmailAndPassword,
+        signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword,
         signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged,
         updateProfile, doc, setDoc, getDoc, serverTimestamp
       };
-
-      getRedirectResult(auth).then(async(result)=>{if(result&&result.user){const u=result.user;const adm=(window._devaRuntimeConfig?.adminEmail||'admin@devaai.com').toLowerCase();const isAdm=(u.email||'').toLowerCase()===adm;localStorage.setItem('deva_current_user',JSON.stringify({uid:u.uid,name:u.displayName||'User',email:u.email||'',plan:'free',isAdmin:isAdm,photoURL:u.photoURL}));window.location.replace(isAdm?'admin.html':'app.html');}}).catch((err) => {
-        console.error('Google redirect auth result error:', err);
-      });
 
       onAuthStateChanged(auth, async (user) => {
         if (!user) return;
@@ -342,10 +352,8 @@ async function loginSuccess(firebaseUser) {
     photoURL: firebaseUser.photoURL
   }));
   showToast('🪔 Welcome ' + (firebaseUser.displayName?.split(' ')[0] || 'Seeker') + '!');
-  setTimeout(() => {
-    if (userData.isAdmin) window.location.replace('admin.html');
-    else window.location.replace('app.html');
-  }, 700);
+  if (userData.isAdmin) window.location.replace('admin.html');
+  else window.location.replace('app.html');
 }
 
 // ── GOOGLE LOGIN ──

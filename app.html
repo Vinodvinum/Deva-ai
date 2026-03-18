@@ -466,19 +466,19 @@ body{background:var(--dp);color:var(--tx);font-family:'EB Garamond',serif;font-s
     <div class="sb-section-title">Divine Persona</div>
     <div class="persona-list">
       <button class="persona-btn active" onclick="setPersona('krishna',this)">
-        <span class="picon">K</span>
+        <span class="picon">&#x1F99A;</span>
         <span class="pinfo"><span class="pname">Krishna Mode</span><span class="psub">Strategy & Dharma</span></span>
       </button>
       <button class="persona-btn" onclick="setPersona('shiva',this)">
-        <span class="picon">S</span>
+        <span class="picon">&#x1F531;</span>
         <span class="pinfo"><span class="pname">Shiva Mode</span><span class="psub">Detachment & Meditation</span></span>
       </button>
       <button class="persona-btn" onclick="setPersona('saraswati',this)">
-        <span class="picon">Sa</span>
+        <span class="picon">&#x1FAB7;</span>
         <span class="pinfo"><span class="pname">Saraswati Mode</span><span class="psub">Knowledge & Learning</span></span>
       </button>
       <button class="persona-btn" onclick="setPersona('hanuman',this)">
-        <span class="picon">H</span>
+        <span class="picon">&#x1F304;</span>
         <span class="pinfo"><span class="pname">Hanuman Mode</span><span class="psub">Devotion & Discipline</span></span>
       </button>
     </div>
@@ -506,13 +506,6 @@ body{background:var(--dp);color:var(--tx);font-family:'EB Garamond',serif;font-s
   </div>
 
   <div class="div-line" style="margin:12px 14px"></div>
-
-  <div class="sb-api">
-    <label>AI Key Mode</label>
-    <input type="password" id="api-input" value="Managed securely on server" autocomplete="off" disabled>
-    <button class="sb-api-save" onclick="saveApiKey()">✦ Server Managed</button>
-  </div>
-
   <div class="sb-footer">Built by <span>Sushvin AI Labs</span></div>
 </div>
 
@@ -1271,18 +1264,31 @@ function getStoredCurrentUser() {
   }
 }
 
+async function getRuntimeConfig() {
+  const CACHE_KEY = 'deva_cfg_v1';
+  const cached = sessionStorage.getItem(CACHE_KEY);
+  if (cached) {
+    try { return JSON.parse(cached); } catch {}
+  }
+  const cfgResp = await fetch('/api/public-config');
+  if (!cfgResp.ok) return null;
+  const cfgData = await cfgResp.json().catch(() => null);
+  if (cfgData) sessionStorage.setItem(CACHE_KEY, JSON.stringify(cfgData));
+  return cfgData;
+}
+
 async function hydrateCurrentUserFromFirebase() {
   try {
     const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
     const { getAuth, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
     const { getFirestore, doc, getDoc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
 
-    const cfgResp = await fetch('/api/public-config', { cache: 'no-store' });
-    if (!cfgResp.ok) return null;
-    const cfgData = await cfgResp.json();
+    const cfgData = await getRuntimeConfig();
+    if (!cfgData) return null;
 
     const app = getApps().length ? getApps()[0] : initializeApp(cfgData.firebaseConfig || {});
     const auth = getAuth(app);
+    window._firebaseAuth = auth;
 
     const firebaseUser = await new Promise((resolve) => {
       let settled = false;
@@ -1298,7 +1304,7 @@ async function hydrateCurrentUserFromFirebase() {
       setTimeout(() => {
         try { unsub(); } catch {}
         done(auth.currentUser || null);
-      }, 1500);
+      }, 800);
     });
 
     if (!firebaseUser) return null;
@@ -1378,22 +1384,16 @@ async function checkAuth() {
   return user;
 }
 
-async function firebaseSignOutBestEffort() {
-  try {
-    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
-    const { getAuth, signOut } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
-    const cfgResp = await fetch('/api/public-config', { cache: 'no-store' });
-    const cfgData = await cfgResp.json();
-    const app = getApps().length ? getApps()[0] : initializeApp(cfgData.firebaseConfig || {});
-    await signOut(getAuth(app));
-  } catch (err) {
-    // Continue local logout even if Firebase sign-out fails.
-  }
-}
-
 async function logout() {
-  await firebaseSignOutBestEffort();
+  try {
+    if (window._firebaseAuth?.signOut) {
+      await window._firebaseAuth.signOut();
+    }
+  } catch (err) {
+    console.error('Sign-out error:', err);
+  }
   localStorage.removeItem('deva_current_user');
+  sessionStorage.clear();
   window.location.href = '/';
 }
 
