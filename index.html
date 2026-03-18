@@ -12,7 +12,7 @@
 ═══════════════════════════════════════════ -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   window._firebaseReadyPromise = (async () => {
@@ -40,10 +40,14 @@
       window._firebaseDb = db;
       window._googleProvider = googleProvider;
       window._firebaseFns = {
-        signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword,
+        signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, createUserWithEmailAndPassword,
         signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged,
         updateProfile, doc, setDoc, getDoc, serverTimestamp
       };
+
+      getRedirectResult(auth).catch((err) => {
+        console.error('Google redirect auth result error:', err);
+      });
 
       onAuthStateChanged(auth, async (user) => {
         if (!user) return;
@@ -348,13 +352,12 @@ async function loginSuccess(firebaseUser) {
 async function googleLogin() {
   if (!(await ensureFirebaseReady())) return;
   hideErrs();
-  showLoader('Connecting with Google…');
+  showLoader('Redirecting to Google…');
   try {
-    const result = await window._firebaseFns.signInWithPopup(window._firebaseAuth, window._googleProvider);
-    await loginSuccess(result.user);
+    await window._firebaseFns.signInWithRedirect(window._firebaseAuth, window._googleProvider);
   } catch(e) {
     hideLoader();
-    if (e.code !== 'auth/popup-closed-by-user') showErr('login-err', getFirebaseError(e.code));
+    showErr('login-err', getFirebaseError(e.code));
   }
 }
 
