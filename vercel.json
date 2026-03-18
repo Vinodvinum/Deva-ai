@@ -1,12 +1,3 @@
 {
-  "rewrites": [
-    { "source": "/", "destination": "/index.html" },
-    { "source": "/login", "destination": "/index.html" },
-    { "source": "/app", "destination": "/app.html" },
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/setup-guide", "destination": "/deva-setup-guide.html" },
-    { "source": "/vscode-guide", "destination": "/deva-vscode-guide.html" },
-    { "source": "/auth-firebase", "destination": "/deva-auth-firebase.html" },
-    { "source": "/preview", "destination": "/deava-ai-preview.html" }
-  ]
+  "framework": "nextjs"
 }
