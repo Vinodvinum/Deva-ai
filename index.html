@@ -49,20 +49,52 @@
         if (!user) return;
         const fns = window._firebaseFns;
         const userDocRef = fns.doc(db, 'users', user.uid);
-        const userDoc = await fns.getDoc(userDocRef);
-        if (!userDoc.exists()) return;
+        const isAdminByEmail = (user.email || '').toLowerCase() === (window._devaRuntimeConfig?.adminEmail || 'admin@devaai.com').toLowerCase();
 
-        const userData = userDoc.data();
-        localStorage.setItem('deva_current_user', JSON.stringify({
-          uid: user.uid,
-          name: user.displayName || userData.name,
-          email: user.email,
-          plan: userData.plan || 'free',
-          isAdmin: userData.isAdmin || false,
-          photoURL: user.photoURL
-        }));
-        if (userData.isAdmin) window.location.href = 'admin.html';
-        else window.location.href = 'app.html';
+        try {
+          const userDoc = await fns.getDoc(userDocRef);
+          let userData;
+
+          if (userDoc.exists()) {
+            userData = userDoc.data();
+          } else {
+            userData = {
+              uid: user.uid,
+              name: user.displayName || 'User',
+              email: user.email || '',
+              plan: 'free',
+              isAdmin: isAdminByEmail,
+              status: 'active',
+              questionsToday: 0,
+              totalQuestions: 0,
+              lastQuestionDate: '',
+              joined: fns.serverTimestamp(),
+              bookmarks: []
+            };
+            await fns.setDoc(userDocRef, userData, { merge: true });
+          }
+
+          localStorage.setItem('deva_current_user', JSON.stringify({
+            uid: user.uid,
+            name: user.displayName || userData.name || 'User',
+            email: user.email || userData.email || '',
+            plan: userData.plan || 'free',
+            isAdmin: !!userData.isAdmin,
+            photoURL: user.photoURL
+          }));
+          window.location.replace(userData.isAdmin ? 'admin.html' : 'app.html');
+        } catch (err) {
+          console.error('Auth state profile bootstrap failed:', err);
+          localStorage.setItem('deva_current_user', JSON.stringify({
+            uid: user.uid,
+            name: user.displayName || 'User',
+            email: user.email || '',
+            plan: 'free',
+            isAdmin: isAdminByEmail,
+            photoURL: user.photoURL
+          }));
+          window.location.replace(isAdminByEmail ? 'admin.html' : 'app.html');
+        }
       });
       return true;
     } catch (err) {
@@ -307,8 +339,8 @@ async function loginSuccess(firebaseUser) {
   }));
   showToast('🪔 Welcome ' + (firebaseUser.displayName?.split(' ')[0] || 'Seeker') + '!');
   setTimeout(() => {
-    if (userData.isAdmin) window.location.href = 'admin.html';
-    else window.location.href = 'app.html';
+    if (userData.isAdmin) window.location.replace('admin.html');
+    else window.location.replace('app.html');
   }, 700);
 }
 
