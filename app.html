@@ -684,9 +684,9 @@ const REFLECTIONS = [
 // ═══════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
   // Check auth
-  const user = checkAuth();
+  const user = await checkAuth();
   if (!user) return;
 
   const apiStatus = document.getElementById('api-input');
@@ -1201,8 +1201,93 @@ function deleteBookmark(id) {
 // ═══════════════════════════════════════════
 // FIREBASE AUTH CHECK
 // ═══════════════════════════════════════════
-function checkAuth() {
-  const user = JSON.parse(localStorage.getItem('deva_current_user') || 'null');
+function getStoredCurrentUser() {
+  try {
+    const raw = localStorage.getItem('deva_current_user');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    return parsed;
+  } catch (err) {
+    localStorage.removeItem('deva_current_user');
+    return null;
+  }
+}
+
+async function hydrateCurrentUserFromFirebase() {
+  try {
+    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+    const { getAuth, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+    const { getFirestore, doc, getDoc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+
+    const cfgResp = await fetch('/api/public-config', { cache: 'no-store' });
+    if (!cfgResp.ok) return null;
+    const cfgData = await cfgResp.json();
+
+    const app = getApps().length ? getApps()[0] : initializeApp(cfgData.firebaseConfig || {});
+    const auth = getAuth(app);
+
+    const firebaseUser = await new Promise((resolve) => {
+      let settled = false;
+      const done = (u) => {
+        if (settled) return;
+        settled = true;
+        resolve(u || null);
+      };
+      const unsub = onAuthStateChanged(auth, (u) => {
+        try { unsub(); } catch {}
+        done(u);
+      }, () => done(null));
+      setTimeout(() => {
+        try { unsub(); } catch {}
+        done(auth.currentUser || null);
+      }, 1500);
+    });
+
+    if (!firebaseUser) return null;
+
+    const db = getFirestore(app);
+    const userRef = doc(db, 'users', firebaseUser.uid);
+    let userDoc = await getDoc(userRef);
+
+    if (!userDoc.exists()) {
+      const adminEmail = (cfgData.adminEmail || 'admin@devaai.com').toLowerCase();
+      await setDoc(userRef, {
+        uid: firebaseUser.uid,
+        name: firebaseUser.displayName || 'User',
+        email: firebaseUser.email || '',
+        plan: 'free',
+        isAdmin: (firebaseUser.email || '').toLowerCase() === adminEmail,
+        status: 'active',
+        questionsToday: 0,
+        totalQuestions: 0,
+        lastQuestionDate: '',
+        joined: serverTimestamp(),
+        bookmarks: []
+      }, { merge: true });
+      userDoc = await getDoc(userRef);
+    }
+
+    const userData = userDoc.exists() ? userDoc.data() : {};
+    const sessionUser = {
+      uid: firebaseUser.uid,
+      name: firebaseUser.displayName || userData.name || 'User',
+      email: firebaseUser.email || userData.email || '',
+      plan: userData.plan || 'free',
+      isAdmin: !!userData.isAdmin,
+      photoURL: firebaseUser.photoURL
+    };
+    localStorage.setItem('deva_current_user', JSON.stringify(sessionUser));
+    return sessionUser;
+  } catch (err) {
+    console.error('Failed to hydrate user session from Firebase:', err);
+    return null;
+  }
+}
+
+async function checkAuth() {
+  let user = getStoredCurrentUser();
+  if (!user) user = await hydrateCurrentUserFromFirebase();
   if (!user) {
     window.location.href = 'index.html';
     return null;
