@@ -924,7 +924,7 @@ async function initFirestoreAdmin() {
   return firestoreCtx;
 }
 
-async function syncUsersFromFirestore() {
+async function syncUsersFromFirestore(retry = true) {
   try {
     const ctx = await initFirestoreAdmin();
     const snap = await ctx.getDocs(ctx.collection(ctx.db, 'users'));
@@ -937,7 +937,12 @@ async function syncUsersFromFirestore() {
     localStorage.setItem('deva_users', JSON.stringify(users));
     return users;
   } catch (err) {
-    showToast('Could not sync users from Firebase. Showing local data.');
+    console.error('Admin Firestore sync failed:', err);
+    if (retry) {
+      firestoreCtx = null;
+      return syncUsersFromFirestore(false);
+    }
+    showToast('Could not sync users from Firebase. Check admin access/rules.');
     return getUsers();
   }
 }
