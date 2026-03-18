@@ -354,7 +354,7 @@ async function googleLogin() {
   hideErrs();
   showLoader('Redirecting to Google…');
   try {
-    await window._firebaseFns.signInWithRedirect(window._firebaseAuth, window._googleProvider);
+    const result = await window._firebaseFns.signInWithPopup(window._firebaseAuth, window._googleProvider); await loginSuccess(result.user);
   } catch(e) {
     hideLoader();
     showErr('login-err', getFirebaseError(e.code));
