@@ -45,7 +45,7 @@
         updateProfile, doc, setDoc, getDoc, serverTimestamp
       };
 
-      getRedirectResult(auth).catch((err) => {
+      getRedirectResult(auth).then(async(result)=>{if(result&&result.user){const u=result.user;const adm=(window._devaRuntimeConfig?.adminEmail||'admin@devaai.com').toLowerCase();const isAdm=(u.email||'').toLowerCase()===adm;localStorage.setItem('deva_current_user',JSON.stringify({uid:u.uid,name:u.displayName||'User',email:u.email||'',plan:'free',isAdmin:isAdm,photoURL:u.photoURL}));window.location.replace(isAdm?'admin.html':'app.html');}}).catch((err) => {
         console.error('Google redirect auth result error:', err);
       });
 
