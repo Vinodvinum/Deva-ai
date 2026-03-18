@@ -18,7 +18,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{height:100%;scroll-behavior:smooth}
-body{background:var(--dp);color:var(--tx);font-family:'EB Garamond',serif;font-size:16px;line-height:1.7;height:100%;overflow:hidden}
+body{background:var(--dp);color:var(--tx);font-family:'EB Garamond',serif;font-size:16px;line-height:1.7;height:100%;overflow:hidden;overflow-x:hidden}
 
 /* Sacred BG */
 .bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
@@ -39,7 +39,7 @@ body{background:var(--dp);color:var(--tx);font-family:'EB Garamond',serif;font-s
   radial-gradient(1px 1px at 50% 85%,rgba(255,220,180,.25) 0%,transparent 100%)}
 
 /* Layout */
-#shell{display:flex;height:100vh;position:relative;z-index:1}
+#shell{display:flex;height:100dvh;position:relative;z-index:1;width:100%;max-width:100%;overflow:hidden}
 
 /* ── SIDEBAR ── */
 #sidebar{
@@ -132,7 +132,22 @@ body{background:var(--dp);color:var(--tx);font-family:'EB Garamond',serif;font-s
 .topbar-title{font-family:'Cinzel',serif;font-size:11px;letter-spacing:3px;color:var(--gdl);text-transform:uppercase}
 .topbar-persona{display:flex;align-items:center;gap:6px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:var(--dm)}
 .topbar-persona strong{color:var(--sfl);font-style:normal}
-.topbar-right{display:flex;align-items:center;gap:8px}
+.topbar-right{display:flex;align-items:center;gap:8px;min-width:0}
+.topbar-user{
+  display:flex;align-items:center;gap:8px;
+  padding:4px 10px;border:1px solid var(--br);border-radius:999px;
+  background:rgba(232,114,12,.06);min-width:0;max-width:240px;
+}
+.topbar-user-photo{
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  border:1px solid var(--br);background:rgba(255,255,255,.08);object-fit:cover;
+}
+.topbar-user-meta{display:flex;flex-direction:column;min-width:0;line-height:1.2}
+.topbar-user-name{
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:1.2px;
+  color:var(--gdl);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.topbar-user-plan{font-size:10px;color:var(--mt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tb-btn{background:none;border:1px solid var(--br);color:var(--dm);font-family:'Cinzel',serif;font-size:8px;letter-spacing:1.5px;padding:6px 12px;cursor:pointer;text-transform:uppercase;transition:all .2s;border-radius:3px;white-space:nowrap}
 .tb-btn:hover{border-color:var(--gdl);color:var(--gdl)}
 
@@ -385,8 +400,28 @@ body{background:var(--dp);color:var(--tx);font-family:'EB Garamond',serif;font-s
   #sidebar.open{transform:translateX(0)}
   .sb-overlay.show{display:block}
   .hamburger{display:flex}
+  #main{min-width:0}
+  .topbar{height:auto;padding:10px 12px;gap:8px}
+  .topbar-left{width:100%;min-width:0}
+  .topbar-title{font-size:10px;letter-spacing:2px}
+  .topbar-persona{display:none}
+  .topbar-right{
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+  }
+  .topbar-user{grid-column:1/-1;max-width:100%}
+  .tb-btn{padding:8px 10px;font-size:8px;letter-spacing:1.2px}
+  .chat-messages{padding:16px 12px}
+  .msg-content{max-width:85%}
+  .chat-input-wrap{padding:10px 12px}
   .scripture-layout{grid-template-columns:1fr}
   .sc-sidebar{display:none}
+}
+@media(max-width:420px){
+  .topbar-right{grid-template-columns:1fr}
+  .tb-btn{width:100%}
 }
 
 /* Divider */
@@ -477,6 +512,20 @@ body{background:var(--dp);color:var(--tx);font-family:'EB Garamond',serif;font-s
       <div class="topbar-persona" id="tb-persona"><strong>🦚 Krishna Mode</strong>&nbsp;· Karma & Dharma</div>
     </div>
     <div class="topbar-right">
+      <div class="topbar-user" id="topbar-user">
+        <img
+          id="tb-user-photo"
+          class="topbar-user-photo"
+          src="https://ssl.gstatic.com/accounts/ui/avatar_2x.png"
+          alt="Google profile"
+          referrerpolicy="no-referrer"
+        >
+        <div class="topbar-user-meta">
+          <div class="topbar-user-name" id="tb-user-name">Seeker</div>
+          <div class="topbar-user-plan" id="tb-user-plan">free plan</div>
+        </div>
+      </div>
+      <button class="tb-btn" onclick="logout()">Sign Out</button>
       <button class="tb-btn" onclick="clearChat()" id="clear-btn">Clear Chat</button>
       <button class="tb-btn" onclick="downloadPDF()">⬇ PDF</button>
       <button class="tb-btn" onclick="showShareModal()">↑ Share</button>
@@ -1289,15 +1338,32 @@ async function checkAuth() {
   let user = getStoredCurrentUser();
   if (!user) user = await hydrateCurrentUserFromFirebase();
   if (!user) {
-    window.location.href = 'index.html';
+    window.location.href = '/';
     return null;
   }
+
+  const defaultAvatar = 'https://ssl.gstatic.com/accounts/ui/avatar_2x.png';
+  const avatarUrl = user.photoURL || defaultAvatar;
+
+  const topbarName = document.getElementById('tb-user-name');
+  const topbarPlan = document.getElementById('tb-user-plan');
+  const topbarPhoto = document.getElementById('tb-user-photo');
+  if (topbarName) topbarName.textContent = user.name || 'Seeker';
+  if (topbarPlan) topbarPlan.textContent = `${user.plan || 'free'} plan`;
+  if (topbarPhoto) {
+    topbarPhoto.src = avatarUrl;
+    topbarPhoto.onerror = () => {
+      topbarPhoto.onerror = null;
+      topbarPhoto.src = defaultAvatar;
+    };
+  }
+
   // Show user info in sidebar
   const footer = document.querySelector('.sb-footer');
   if (footer) {
     footer.innerHTML = `
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        ${user.photoURL ? `<img src="${user.photoURL}" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--br)">` : '<span style="font-size:20px">🪔</span>'}
+        <img src="${avatarUrl}" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--br);object-fit:cover;background:rgba(255,255,255,.08)">
         <div>
           <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--gdl);text-transform:uppercase">${user.name?.split(' ')[0] || 'Seeker'}</div>
           <div style="font-size:10px;color:var(--mt)">${user.plan || 'free'} plan</div>
@@ -1306,6 +1372,7 @@ async function checkAuth() {
       <button onclick="logout()" style="width:100%;padding:6px;background:transparent;border:1px solid rgba(139,32,32,.4);color:#e87d94;font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;border-radius:2px;margin-bottom:8px">Sign Out</button>
       <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:2px;color:var(--mt);text-align:center;text-transform:uppercase">Built by <span style="color:var(--sfl)">Sushvin AI Labs</span></div>`;
   }
+
   // Apply plan limits
   if (user.plan === 'free') {
     const today = new Date().toDateString();
@@ -1334,7 +1401,7 @@ async function firebaseSignOutBestEffort() {
 async function logout() {
   await firebaseSignOutBestEffort();
   localStorage.removeItem('deva_current_user');
-  window.location.href = 'index.html';
+  window.location.href = '/';
 }
 
 function checkQuestionLimit() {
