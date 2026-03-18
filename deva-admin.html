@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deva AI — Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;1,400&family=EB+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sf:#e8720c;--sfl:#f5a44a;--sfd:rgba(232,114,12,.15);
+  --gd:#c9943a;--gdl:#e8c070;--gdp:rgba(232,192,112,.1);
+  --dp:#05030a;--dk:#0c0816;--pn:#120f1e;--md:#1c1730;
+  --br:rgba(232,114,12,.18);--brg:rgba(232,192,112,.2);
+  --tx:#f0e8d8;--dm:#9a8870;--mt:#3a3428;
+  --green:#1a5a2a;--greenl:#4abcaa;
+  --red:#8b2020;--redl:#e87d94;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:var(--dp);color:var(--tx);font-family:'EB Garamond',serif;font-size:15px}
+
+.bg{position:fixed;inset:0;pointer-events:none;z-index:0}
+.bg::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 40% at 50% -10%,rgba(232,114,12,.12) 0%,transparent 60%)}
+
+#shell{display:flex;height:100vh;position:relative;z-index:1}
+
+/* ── SIDEBAR ── */
+#aside{
+  width:230px;flex-shrink:0;
+  background:rgba(12,8,22,.97);
+  border-right:1px solid var(--br);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.aside-logo{
+  padding:18px 16px;border-bottom:1px solid var(--br);
+  display:flex;align-items:center;gap:10px;
+}
+.aside-logo-text{font-family:'Cinzel Decorative',serif;font-size:14px;color:var(--gdl);letter-spacing:2px}
+.aside-badge{font-family:'Cinzel',serif;font-size:7px;letter-spacing:2px;background:rgba(232,114,12,.2);border:1px solid var(--sf);color:var(--sfl);padding:2px 7px;text-transform:uppercase;border-radius:2px;margin-left:4px}
+
+.aside-section{font-family:'Cinzel',serif;font-size:8px;letter-spacing:3px;color:var(--mt);text-transform:uppercase;padding:14px 16px 6px}
+
+.aside-nav{padding:0 8px;display:flex;flex-direction:column;gap:2px}
+.aside-btn{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  background:transparent;border:1px solid transparent;
+  color:var(--dm);font-family:'Cinzel',serif;font-size:9px;letter-spacing:1.5px;
+  cursor:pointer;transition:all .2s;text-align:left;text-transform:uppercase;
+  border-radius:3px;width:100%;
+}
+.aside-btn:hover{background:var(--gdp);border-color:var(--brg);color:var(--gdl)}
+.aside-btn.active{background:var(--sfd);border-color:var(--sf);color:var(--sfl)}
+.aside-btn .ai{font-size:15px;width:24px;text-align:center;flex-shrink:0}
+
+.aside-footer{margin-top:auto;padding:14px 16px;border-top:1px solid var(--br)}
+.admin-info{font-family:'Cinzel',serif;font-size:8px;letter-spacing:1.5px;color:var(--dm);text-transform:uppercase;margin-bottom:8px}
+.admin-info strong{color:var(--sfl);display:block;margin-bottom:2px}
+.logout-btn{width:100%;padding:8px;background:transparent;border:1px solid rgba(139,32,32,.4);color:var(--redl);font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:all .2s;border-radius:2px}
+.logout-btn:hover{background:rgba(139,32,32,.1)}
+.built-by{font-family:'Cinzel',serif;font-size:7px;letter-spacing:1.5px;color:var(--mt);text-transform:uppercase;margin-top:10px;text-align:center}
+.built-by span{color:var(--sfl)}
+
+/* ── MAIN ── */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* Topbar */
+.topbar{
+  padding:0 24px;height:54px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(5,3,10,.7);border-bottom:1px solid var(--br);
+  backdrop-filter:blur(12px);
+}
+.tb-title{font-family:'Cinzel',serif;font-size:12px;letter-spacing:3px;color:var(--gdl);text-transform:uppercase}
+.tb-right{display:flex;align-items:center;gap:10px}
+.tb-btn{background:none;border:1px solid var(--br);color:var(--dm);font-family:'Cinzel',serif;font-size:8px;letter-spacing:1.5px;padding:6px 12px;cursor:pointer;text-transform:uppercase;transition:all .2s;border-radius:3px}
+.tb-btn:hover{border-color:var(--gdl);color:var(--gdl)}
+.tb-btn.primary{border-color:var(--sf);color:var(--sfl);background:var(--sfd)}
+
+/* Pages */
+.page{display:none;flex:1;overflow-y:auto;padding:24px;
+  scrollbar-width:thin;scrollbar-color:var(--br) transparent}
+.page.active{display:block}
+.page::-webkit-scrollbar{width:3px}
+.page::-webkit-scrollbar-thumb{background:var(--br)}
+
+/* ── STATS CARDS ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--br);margin-bottom:24px}
+@media(max-width:900px){.stats-row{grid-template-columns:1fr 1fr}}
+.stat-card{background:var(--pn);padding:20px 18px;position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--sf),transparent);opacity:.4}
+.sc-label{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--dm);text-transform:uppercase;margin-bottom:8px}
+.sc-value{font-family:'Cinzel Decorative',serif;font-size:32px;color:var(--gdl);line-height:1;margin-bottom:4px}
+.sc-change{font-size:12px;color:var(--greenl);font-family:'EB Garamond',serif}
+.sc-change.neg{color:var(--redl)}
+.sc-icon{position:absolute;top:16px;right:16px;font-size:28px;opacity:.2}
+
+/* Section title */
+.sec-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--gd);text-transform:uppercase;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between}
+.sec-title::before{display:none}
+.sec-action{font-size:9px;letter-spacing:1.5px;border:1px solid var(--br);color:var(--dm);padding:4px 10px;cursor:pointer;border-radius:2px;transition:all .2s;background:none}
+.sec-action:hover{border-color:var(--gd);color:var(--gdl)}
+
+/* Charts */
+.chart-row{display:grid;grid-template-columns:2fr 1fr;gap:2px;background:var(--br);margin-bottom:24px}
+@media(max-width:800px){.chart-row{grid-template-columns:1fr}}
+.chart-box{background:var(--pn);padding:20px}
+.chart-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--dm);text-transform:uppercase;margin-bottom:16px}
+
+.bar-chart{display:flex;flex-direction:column;gap:8px}
+.bar-row{display:flex;align-items:center;gap:10px}
+.bar-label{font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:var(--dm);text-transform:uppercase;min-width:60px}
+.bar-track{flex:1;height:6px;background:rgba(232,114,12,.08);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width 1s ease}
+.bar-val{font-family:'Cinzel',serif;font-size:9px;color:var(--gdl);min-width:36px;text-align:right}
+
+.donut-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;padding:10px}
+.donut-svg{filter:drop-shadow(0 0 12px rgba(232,114,12,.2))}
+.donut-legend{display:flex;flex-direction:column;gap:6px;width:100%}
+.dl-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dm)}
+.dl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dl-val{margin-left:auto;font-family:'Cinzel',serif;font-size:9px;color:var(--gdl)}
+
+/* ── TABLES ── */
+.tbl-wrap{background:var(--pn);border:1px solid var(--br);margin-bottom:24px;overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:14px}
+thead tr{background:rgba(232,114,12,.05);border-bottom:1px solid var(--br)}
+th{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--gd);text-transform:uppercase;padding:11px 14px;text-align:left}
+td{padding:10px 14px;border-bottom:1px solid rgba(232,114,12,.05);color:var(--tx);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(232,114,12,.03)}
+.td-name{font-family:'Cinzel',serif;font-size:11px;color:var(--gdl)}
+.td-email{font-size:13px;color:var(--dm)}
+
+/* Badges */
+.badge{font-family:'Cinzel',serif;font-size:7px;letter-spacing:1px;padding:2px 8px;border-radius:2px;border:1px solid;text-transform:uppercase}
+.b-free{color:#7fffc8;background:rgba(42,138,122,.15);border-color:rgba(42,138,122,.3)}
+.b-sadhaka{color:var(--sfl);background:var(--sfd);border-color:var(--sf)}
+.b-guru{color:var(--gdl);background:var(--gdp);border-color:var(--gd)}
+.b-active{color:#7fffc8;background:rgba(30,100,50,.15);border-color:rgba(60,160,80,.3)}
+.b-inactive{color:var(--dm);background:rgba(60,50,40,.2);border-color:var(--br)}
+
+/* Table actions */
+.tbl-act{display:flex;gap:5px}
+.ta-btn{background:none;border:1px solid var(--br);color:var(--dm);font-family:'Cinzel',serif;font-size:7px;letter-spacing:1px;padding:3px 8px;cursor:pointer;transition:all .2s;border-radius:2px;text-transform:uppercase}
+.ta-btn:hover{border-color:var(--gdl);color:var(--gdl)}
+.ta-btn.del:hover{border-color:var(--redl);color:var(--redl)}
+
+/* ── SCRIPTURE MANAGER ── */
+.scripture-form{background:var(--pn);border:1px solid var(--br);padding:24px;margin-bottom:24px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}}
+.form-field label{display:block;font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--dm);text-transform:uppercase;margin-bottom:6px}
+.form-field input,.form-field select,.form-field textarea{
+  width:100%;background:var(--dk);border:1px solid var(--br);color:var(--tx);
+  font-family:'EB Garamond',serif;font-size:14px;padding:9px 12px;outline:none;
+  transition:border-color .2s;border-radius:2px;
+}
+.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--sf)}
+.form-field textarea{resize:vertical;min-height:80px}
+.form-field select option{background:var(--dk)}
+.form-actions{display:flex;gap:10px;margin-top:14px}
+.fa-btn{padding:9px 20px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all .2s;border-radius:2px;text-transform:uppercase}
+.fa-primary{background:linear-gradient(135deg,var(--sf),var(--gd));border:none;color:#05030a;font-weight:700}
+.fa-secondary{background:transparent;border:1px solid var(--br);color:var(--dm)}
+.fa-secondary:hover{border-color:var(--gdl);color:var(--gdl)}
+
+/* ── QUERIES LOG ── */
+.query-item{background:var(--pn);border:1px solid var(--br);padding:14px 16px;margin-bottom:2px}
+.qi-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px}
+.qi-user{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1.5px;color:var(--gdl);text-transform:uppercase}
+.qi-time{font-family:'Cinzel',serif;font-size:8px;color:var(--mt);letter-spacing:1px}
+.qi-q{font-size:14px;color:var(--tx);margin-bottom:4px}
+.qi-persona{font-family:'Cinzel',serif;font-size:7px;letter-spacing:1.5px;color:var(--sf);text-transform:uppercase}
+
+/* ── SETTINGS ── */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--br);margin-bottom:24px}
+@media(max-width:700px){.settings-grid{grid-template-columns:1fr}}
+.setting-card{background:var(--pn);padding:22px 20px}
+.setting-label{font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--gdl);text-transform:uppercase;margin-bottom:6px}
+.setting-desc{font-size:13px;color:var(--dm);margin-bottom:14px;line-height:1.6}
+
+/* Toggle switch */
+.toggle-wrap{display:flex;align-items:center;gap:10px}
+.toggle{width:40px;height:20px;background:var(--br);border-radius:10px;position:relative;cursor:pointer;transition:background .2s}
+.toggle.on{background:var(--sf)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s}
+.toggle.on::after{transform:translateX(20px)}
+.toggle-label{font-size:13px;color:var(--dm)}
+
+/* Revenue chart */
+.rev-bars{display:flex;align-items:flex-end;gap:4px;height:80px;padding-top:8px}
+.rev-bar{flex:1;border-radius:2px 2px 0 0;position:relative;transition:height .5s ease;cursor:pointer}
+.rev-bar:hover::after{content:attr(data-val);position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-family:'Cinzel',serif;font-size:8px;color:var(--gdl);white-space:nowrap}
+.rev-months{display:flex;gap:4px;margin-top:4px}
+.rev-month{flex:1;font-family:'Cinzel',serif;font-size:7px;color:var(--mt);text-align:center;text-transform:uppercase;letter-spacing:.5px}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;right:20px;z-index:200;background:rgba(12,8,22,.95);border:1px solid var(--gd);padding:10px 16px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:1.5px;color:var(--gdl);text-transform:uppercase;transform:translateY(60px);transition:transform .3s;border-radius:3px;pointer-events:none}
+.toast.show{transform:translateY(0)}
+
+/* Modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;padding:20px}
+.modal-bg.show{display:flex}
+.modal{background:var(--pn);border:1px solid var(--br);padding:28px;max-width:420px;width:100%;position:relative;border-radius:2px}
+.modal h3{font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--gdl);text-transform:uppercase;margin-bottom:18px}
+.modal-close{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--dm);cursor:pointer;font-size:16px}
+
+/* Search bar */
+.search-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.search-inp{flex:1;min-width:200px;background:var(--dk);border:1px solid var(--br);color:var(--tx);font-family:'EB Garamond',serif;font-size:14px;padding:8px 12px;outline:none;border-radius:2px;transition:border-color .2s}
+.search-inp:focus{border-color:var(--sf)}
+.filter-sel{background:var(--dk);border:1px solid var(--br);color:var(--dm);font-family:'Cinzel',serif;font-size:9px;padding:8px 12px;outline:none;border-radius:2px;letter-spacing:1px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div id="shell">
+
+<!-- ── SIDEBAR ── -->
+<div id="aside">
+  <div class="aside-logo">
+    <span style="font-size:20px;filter:drop-shadow(0 0 6px rgba(232,114,12,.5))">🪔</span>
+    <div>
+      <div class="aside-logo-text">DEVA AI</div>
+    </div>
+    <span class="aside-badge">Admin</span>
+  </div>
+
+  <div class="aside-section">Overview</div>
+  <div class="aside-nav">
+    <button class="aside-btn active" onclick="showPage('dashboard',this)"><span class="ai">📊</span>Dashboard</button>
+    <button class="aside-btn" onclick="showPage('analytics',this)"><span class="ai">📈</span>Analytics</button>
+  </div>
+
+  <div class="aside-section">Manage</div>
+  <div class="aside-nav">
+    <button class="aside-btn" onclick="showPage('users',this)"><span class="ai">👤</span>Users</button>
+    <button class="aside-btn" onclick="showPage('scriptures',this)"><span class="ai">📜</span>Scriptures</button>
+    <button class="aside-btn" onclick="showPage('queries',this)"><span class="ai">💬</span>Query Log</button>
+  </div>
+
+  <div class="aside-section">Config</div>
+  <div class="aside-nav">
+    <button class="aside-btn" onclick="showPage('settings',this)"><span class="ai">⚙️</span>Settings</button>
+    <button class="aside-btn" onclick="window.open('deva-ai.html','_blank')"><span class="ai">🪔</span>Open App</button>
+  </div>
+
+  <div class="aside-footer">
+    <div class="admin-info">
+      <strong id="admin-name">Admin</strong>
+      <span id="admin-email">admin@devaai.com</span>
+    </div>
+    <button class="logout-btn" onclick="logout()">Sign Out</button>
+    <div class="built-by">Built by <span>Sushvin AI Labs</span></div>
+  </div>
+</div>
+
+<!-- ── MAIN ── -->
+<div id="main">
+  <div class="topbar">
+    <div class="tb-title" id="tb-title">Dashboard</div>
+    <div class="tb-right">
+      <button class="tb-btn" onclick="refreshData()">↻ Refresh</button>
+      <button class="tb-btn primary" onclick="showPage('scriptures',null)">+ Add Scripture</button>
+    </div>
+  </div>
+
+  <!-- ── DASHBOARD PAGE ── -->
+  <div class="page active" id="pg-dashboard">
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="sc-icon">👤</div>
+        <div class="sc-label">Total Users</div>
+        <div class="sc-value" id="stat-users">0</div>
+        <div class="sc-change" id="stat-users-change">Loading…</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-icon">💬</div>
+        <div class="sc-label">Total Queries</div>
+        <div class="sc-value" id="stat-queries">0</div>
+        <div class="sc-change">All time</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-icon">💰</div>
+        <div class="sc-label">Revenue (INR)</div>
+        <div class="sc-value" id="stat-revenue">₹0</div>
+        <div class="sc-change">Lifetime</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-icon">🔥</div>
+        <div class="sc-label">Active Today</div>
+        <div class="sc-value" id="stat-active">0</div>
+        <div class="sc-change">Unique sessions</div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-box">
+        <div class="chart-title">Monthly Revenue (INR)</div>
+        <div class="rev-bars" id="rev-bars"></div>
+        <div class="rev-months" id="rev-months"></div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Plan Distribution</div>
+        <div class="donut-wrap">
+          <svg class="donut-svg" width="100" height="100" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="35" fill="none" stroke="rgba(232,114,12,.08)" stroke-width="14"/>
+            <circle id="donut-free" cx="50" cy="50" r="35" fill="none" stroke="#4abcaa" stroke-width="14" stroke-dasharray="110 110" stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
+            <circle id="donut-sadhaka" cx="50" cy="50" r="35" fill="none" stroke="#e8720c" stroke-width="14" stroke-dasharray="0 220" stroke-dashoffset="-110" transform="rotate(-90 50 50)"/>
+            <circle id="donut-guru" cx="50" cy="50" r="35" fill="none" stroke="#e8c070" stroke-width="14" stroke-dasharray="0 220" stroke-dashoffset="-110" transform="rotate(-90 50 50)"/>
+          </svg>
+          <div class="donut-legend">
+            <div class="dl-row"><div class="dl-dot" style="background:#4abcaa"></div>Shishya (Free)<div class="dl-val" id="dl-free">0</div></div>
+            <div class="dl-row"><div class="dl-dot" style="background:#e8720c"></div>Sadhaka<div class="dl-val" id="dl-sadhaka">0</div></div>
+            <div class="dl-row"><div class="dl-dot" style="background:#e8c070"></div>Guru<div class="dl-val" id="dl-guru">0</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-title">
+      Recent Users
+      <button class="sec-action" onclick="showPage('users',null)">View All →</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>Email</th><th>Plan</th><th>Joined</th><th>Questions</th><th>Actions</th></tr></thead>
+        <tbody id="recent-users-tb"></tbody>
+      </table>
+    </div>
+
+    <div class="sec-title">
+      Popular Queries
+      <button class="sec-action" onclick="showPage('queries',null)">View All →</button>
+    </div>
+    <div id="popular-queries"></div>
+
+  </div>
+
+  <!-- ── ANALYTICS PAGE ── -->
+  <div class="page" id="pg-analytics">
+    <div class="sec-title">User Growth</div>
+    <div class="chart-row" style="margin-bottom:24px">
+      <div class="chart-box" style="padding:20px">
+        <div class="chart-title">Persona Usage</div>
+        <div class="bar-chart" style="margin-top:10px">
+          <div class="bar-row"><div class="bar-label">Krishna</div><div class="bar-track"><div class="bar-fill" style="width:68%;background:linear-gradient(90deg,#4abcaa,#e8c070)"></div></div><div class="bar-val">68%</div></div>
+          <div class="bar-row"><div class="bar-label">Shiva</div><div class="bar-track"><div class="bar-fill" style="width:18%;background:linear-gradient(90deg,#6340b4,#4abcaa)"></div></div><div class="bar-val">18%</div></div>
+          <div class="bar-row"><div class="bar-label">Saraswati</div><div class="bar-track"><div class="bar-fill" style="width:10%;background:linear-gradient(90deg,#c4556a,#e8c070)"></div></div><div class="bar-val">10%</div></div>
+          <div class="bar-row"><div class="bar-label">Hanuman</div><div class="bar-track"><div class="bar-fill" style="width:4%;background:linear-gradient(90deg,#e8720c,#e8c070)"></div></div><div class="bar-val">4%</div></div>
+        </div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Top Topics</div>
+        <div class="bar-chart" style="margin-top:10px">
+          <div class="bar-row"><div class="bar-label">Dharma</div><div class="bar-track"><div class="bar-fill" style="width:80%;background:linear-gradient(90deg,var(--sf),var(--gd))"></div></div><div class="bar-val">80%</div></div>
+          <div class="bar-row"><div class="bar-label">Karma</div><div class="bar-track"><div class="bar-fill" style="width:65%;background:linear-gradient(90deg,var(--sf),var(--gd))"></div></div><div class="bar-val">65%</div></div>
+          <div class="bar-row"><div class="bar-label">Meditation</div><div class="bar-track"><div class="bar-fill" style="width:50%;background:linear-gradient(90deg,var(--sf),var(--gd))"></div></div><div class="bar-val">50%</div></div>
+          <div class="bar-row"><div class="bar-label">Purpose</div><div class="bar-track"><div class="bar-fill" style="width:42%;background:linear-gradient(90deg,var(--sf),var(--gd))"></div></div><div class="bar-val">42%</div></div>
+          <div class="bar-row"><div class="bar-label">Fear</div><div class="bar-track"><div class="bar-fill" style="width:35%;background:linear-gradient(90deg,var(--sf),var(--gd))"></div></div><div class="bar-val">35%</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-title">Language Usage</div>
+    <div class="tbl-wrap" style="margin-bottom:24px">
+      <table>
+        <thead><tr><th>Language</th><th>Users</th><th>Queries</th><th>Share</th></tr></thead>
+        <tbody>
+          <tr><td class="td-name">English</td><td>—</td><td>—</td><td><div class="bar-track" style="max-width:200px"><div class="bar-fill" style="width:72%;background:linear-gradient(90deg,var(--sf),var(--gd))"></div></div></td></tr>
+          <tr><td class="td-name">ಕನ್ನಡ (Kannada)</td><td>—</td><td>—</td><td><div class="bar-track" style="max-width:200px"><div class="bar-fill" style="width:18%;background:linear-gradient(90deg,#4abcaa,#e8c070)"></div></div></td></tr>
+          <tr><td class="td-name">हिन्दी (Hindi)</td><td>—</td><td>—</td><td><div class="bar-track" style="max-width:200px"><div class="bar-fill" style="width:8%;background:linear-gradient(90deg,#c4556a,#e8c070)"></div></div></td></tr>
+          <tr><td class="td-name">தமிழ் (Tamil)</td><td>—</td><td>—</td><td><div class="bar-track" style="max-width:200px"><div class="bar-fill" style="width:2%;background:linear-gradient(90deg,#6340b4,#4abcaa)"></div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── USERS PAGE ── -->
+  <div class="page" id="pg-users">
+    <div class="search-bar">
+      <input type="text" class="search-inp" placeholder="🔍 Search users by name or email…" oninput="filterUsers(this.value)" id="user-search">
+      <select class="filter-sel" onchange="filterByPlan(this.value)">
+        <option value="all">All Plans</option>
+        <option value="free">Free</option>
+        <option value="sadhaka">Sadhaka</option>
+        <option value="guru">Guru</option>
+      </select>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>Email</th><th>Plan</th><th>Joined</th><th>Questions</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="users-tb"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── SCRIPTURES PAGE ── -->
+  <div class="page" id="pg-scriptures">
+    <div class="sec-title">Add New Verse</div>
+    <div class="scripture-form">
+      <div class="form-grid">
+        <div class="form-field">
+          <label>Scripture</label>
+          <select id="sc-scripture">
+            <option value="gita">Bhagavad Gita</option>
+            <option value="upanishads">Upanishads</option>
+            <option value="ramayana">Ramayana</option>
+            <option value="vedas">Vedas</option>
+            <option value="mahabharata">Mahabharata</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Reference (e.g. BG 2.47)</label>
+          <input type="text" id="sc-ref" placeholder="e.g. BG 3.27">
+        </div>
+      </div>
+      <div class="form-field" style="margin-bottom:12px">
+        <label>Sanskrit / Original Text</label>
+        <textarea id="sc-sanskrit" placeholder="Enter the original verse in Sanskrit or original language…"></textarea>
+      </div>
+      <div class="form-field" style="margin-bottom:12px">
+        <label>Translation</label>
+        <textarea id="sc-trans" placeholder="Enter the English translation…"></textarea>
+      </div>
+      <div class="form-field" style="margin-bottom:12px">
+        <label>Explanation</label>
+        <textarea id="sc-exp" placeholder="Detailed explanation of the verse and its meaning…" style="min-height:100px"></textarea>
+      </div>
+      <div class="form-field" style="margin-bottom:0">
+        <label>Tags (comma separated)</label>
+        <input type="text" id="sc-tags" placeholder="karma, dharma, action, detachment">
+      </div>
+      <div class="form-actions">
+        <button class="fa-btn fa-primary" onclick="addVerse()">✦ Add Verse to Database</button>
+        <button class="fa-btn fa-secondary" onclick="clearVerseForm()">Clear</button>
+      </div>
+    </div>
+
+    <div class="sec-title">Scripture Database</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Reference</th><th>Scripture</th><th>Preview</th><th>Tags</th><th>Actions</th></tr></thead>
+        <tbody id="verses-tb"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── QUERIES PAGE ── -->
+  <div class="page" id="pg-queries">
+    <div class="search-bar">
+      <input type="text" class="search-inp" placeholder="🔍 Search queries…" id="query-search">
+      <select class="filter-sel">
+        <option>All Personas</option>
+        <option>Krishna Mode</option>
+        <option>Shiva Mode</option>
+        <option>Saraswati Mode</option>
+        <option>Hanuman Mode</option>
+      </select>
+    </div>
+    <div id="queries-list"></div>
+  </div>
+
+  <!-- ── SETTINGS PAGE ── -->
+  <div class="page" id="pg-settings">
+    <div class="sec-title">Application Settings</div>
+    <div class="settings-grid">
+      <div class="setting-card">
+        <div class="setting-label">Anthropic API Key</div>
+        <div class="setting-desc">The Claude API key used by the application to power AI responses.</div>
+        <div class="form-field" style="margin-bottom:8px">
+          <input type="password" id="cfg-api" placeholder="sk-ant-api03-…">
+        </div>
+        <button class="fa-btn fa-primary" onclick="saveSetting('api')">Save Key</button>
+      </div>
+
+      <div class="setting-card">
+        <div class="setting-label">Razorpay Key</div>
+        <div class="setting-desc">Your Razorpay API key for payment processing.</div>
+        <div class="form-field" style="margin-bottom:8px">
+          <input type="text" id="cfg-rzp" placeholder="rzp_live_…">
+        </div>
+        <button class="fa-btn fa-primary" onclick="saveSetting('rzp')">Save Key</button>
+      </div>
+
+      <div class="setting-card">
+        <div class="setting-label">Free Plan Limits</div>
+        <div class="setting-desc">Maximum questions per day for free (Shishya) users.</div>
+        <div class="form-field" style="margin-bottom:8px">
+          <input type="number" id="cfg-free-limit" value="10" min="1" max="100">
+        </div>
+        <button class="fa-btn fa-primary" onclick="saveSetting('free_limit')">Save</button>
+      </div>
+
+      <div class="setting-card">
+        <div class="setting-label">AI Model</div>
+        <div class="setting-desc">Select the Claude model powering Deva AI responses.</div>
+        <div class="form-field" style="margin-bottom:8px">
+          <select id="cfg-model">
+            <option value="claude-sonnet-4-20250514" selected>Claude Sonnet 4 (Recommended)</option>
+            <option value="claude-haiku-4-5-20251001">Claude Haiku 4 (Faster)</option>
+          </select>
+        </div>
+        <button class="fa-btn fa-primary" onclick="saveSetting('model')">Save</button>
+      </div>
+
+      <div class="setting-card">
+        <div class="setting-label">Voice Features</div>
+        <div class="setting-desc">Enable or disable voice input and text-to-speech responses.</div>
+        <div class="toggle-wrap" style="margin-bottom:14px">
+          <div class="toggle on" id="tgl-voice" onclick="toggleSetting(this,'voice')"></div>
+          <div class="toggle-label">Voice input enabled</div>
+        </div>
+        <div class="toggle-wrap">
+          <div class="toggle on" id="tgl-tts" onclick="toggleSetting(this,'tts')"></div>
+          <div class="toggle-label">Text-to-speech enabled</div>
+        </div>
+      </div>
+
+      <div class="setting-card">
+        <div class="setting-label">Maintenance Mode</div>
+        <div class="setting-desc">When enabled, users see a maintenance message instead of the app.</div>
+        <div class="toggle-wrap" style="margin-bottom:14px">
+          <div class="toggle" id="tgl-maintenance" onclick="toggleSetting(this,'maintenance')"></div>
+          <div class="toggle-label">Maintenance mode</div>
+        </div>
+        <div class="setting-desc" style="font-size:12px;margin:0">App URL: <strong style="color:var(--gdl)">deva-ai.html</strong></div>
+      </div>
+    </div>
+
+    <div class="sec-title">Pricing Configuration</div>
+    <div class="settings-grid">
+      <div class="setting-card">
+        <div class="setting-label">Sadhaka Plan Price</div>
+        <div class="setting-desc">Monthly subscription price for Sadhaka plan.</div>
+        <div class="form-field" style="margin-bottom:8px">
+          <input type="number" id="cfg-sadhaka-price" value="199" min="1">
+        </div>
+        <button class="fa-btn fa-primary" onclick="saveSetting('sadhaka_price')">Save</button>
+      </div>
+      <div class="setting-card">
+        <div class="setting-label">Guru Plan Price</div>
+        <div class="setting-desc">Monthly subscription price for Guru plan.</div>
+        <div class="form-field" style="margin-bottom:8px">
+          <input type="number" id="cfg-guru-price" value="499" min="1">
+        </div>
+        <button class="fa-btn fa-primary" onclick="saveSetting('guru_price')">Save</button>
+      </div>
+    </div>
+
+    <div class="sec-title" style="color:var(--redl)">Danger Zone</div>
+    <div style="background:rgba(139,32,32,.08);border:1px solid rgba(139,32,32,.25);padding:20px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+      <div>
+        <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--redl);letter-spacing:1px;margin-bottom:4px">Reset All Demo Data</div>
+        <div style="font-size:13px;color:var(--dm)">This will clear all users, queries, and reset stats. Cannot be undone.</div>
+      </div>
+      <button onclick="resetAll()" style="padding:10px 20px;background:transparent;border:1px solid var(--redl);color:var(--redl);font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:all .2s;border-radius:2px">Reset Data</button>
+    </div>
+  </div>
+
+</div><!-- #main -->
+</div><!-- #shell -->
+
+<div class="toast" id="toast"></div>
+
+<!-- User Edit Modal -->
+<div class="modal-bg" id="user-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3>Edit User</h3>
+    <div class="form-field" style="margin-bottom:12px">
+      <label>Name</label>
+      <input type="text" id="edit-name">
+    </div>
+    <div class="form-field" style="margin-bottom:12px">
+      <label>Plan</label>
+      <select id="edit-plan">
+        <option value="free">Shishya (Free)</option>
+        <option value="sadhaka">Sadhaka (₹199/mo)</option>
+        <option value="guru">Guru (₹499/mo)</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin-bottom:18px">
+      <label>Status</label>
+      <select id="edit-status">
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+        <option value="banned">Banned</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="fa-btn fa-primary" onclick="saveUserEdit()">Save Changes</button>
+      <button class="fa-btn fa-secondary" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── ADMIN AUTH CHECK ──
+let currentUser = null;
+let editingEmail = null;
+
+window.addEventListener('load', () => {
+  currentUser = JSON.parse(localStorage.getItem('deva_current_user') || 'null');
+  if (!currentUser || !currentUser.isAdmin) {
+    window.location.href = 'deva-auth.html';
+    return;
+  }
+  document.getElementById('admin-name').textContent = currentUser.name;
+  document.getElementById('admin-email').textContent = currentUser.email;
+  loadDashboard();
+  loadSettings();
+});
+
+function logout() {
+  localStorage.removeItem('deva_current_user');
+  window.location.href = 'deva-auth.html';
+}
+
+// ── NAVIGATION ──
+function showPage(page, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('pg-' + page).classList.add('active');
+  document.querySelectorAll('.aside-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  const titles = {dashboard:'Dashboard',analytics:'Analytics',users:'User Management',scriptures:'Scripture Manager',queries:'Query Log',settings:'Settings'};
+  document.getElementById('tb-title').textContent = titles[page] || page;
+
+  if (page === 'users') loadUsers();
+  if (page === 'scriptures') loadVerses();
+  if (page === 'queries') loadQueries();
+  if (page === 'dashboard') loadDashboard();
+}
+
+// ── DASHBOARD ──
+function loadDashboard() {
+  const users = getUsers();
+  const userList = Object.values(users);
+  const stats = getStats();
+
+  document.getElementById('stat-users').textContent = userList.length;
+  document.getElementById('stat-queries').textContent = stats.totalQuestions || 0;
+  document.getElementById('stat-revenue').textContent = '₹' + (stats.revenue || 0).toLocaleString('en-IN');
+  document.getElementById('stat-active').textContent = Math.floor(userList.length * 0.3) || 0;
+  document.getElementById('stat-users-change').textContent = userList.length > 0 ? `+${userList.length} registered` : 'No users yet';
+
+  // Plan distribution
+  const free = userList.filter(u => u.plan === 'free').length;
+  const sadhaka = userList.filter(u => u.plan === 'sadhaka').length;
+  const guru = userList.filter(u => u.plan === 'guru').length;
+  const total = Math.max(userList.length, 1);
+  document.getElementById('dl-free').textContent = free;
+  document.getElementById('dl-sadhaka').textContent = sadhaka;
+  document.getElementById('dl-guru').textContent = guru;
+
+  // Donut chart
+  const circ = 2 * Math.PI * 35; // ~220
+  const freeD = (free/total) * circ;
+  const sadhakaD = (sadhaka/total) * circ;
+  const guruD = (guru/total) * circ;
+  document.getElementById('donut-free').style.strokeDasharray = `${freeD} ${circ}`;
+  document.getElementById('donut-sadhaka').style.strokeDasharray = `${sadhakaD} ${circ}`;
+  document.getElementById('donut-sadhaka').style.strokeDashoffset = -freeD;
+  document.getElementById('donut-guru').style.strokeDasharray = `${guruD} ${circ}`;
+  document.getElementById('donut-guru').style.strokeDashoffset = -(freeD + sadhakaD);
+
+  // Revenue bars (mock monthly data)
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const now = new Date().getMonth();
+  const revData = months.map((_,i) => i < now ? Math.floor(Math.random()*2000+500) : (i===now ? stats.revenue||0 : 0));
+  const maxRev = Math.max(...revData, 1);
+  const barsEl = document.getElementById('rev-bars');
+  const monthsEl = document.getElementById('rev-months');
+  barsEl.innerHTML = revData.map((v,i) => {
+    const h = Math.round((v/maxRev)*72);
+    const active = i === now;
+    return `<div class="rev-bar" style="height:${h}px;background:linear-gradient(180deg,${active?'var(--sf)':'rgba(232,114,12,.3)'},${active?'var(--gd)':'rgba(232,114,12,.1)'})" data-val="₹${v.toLocaleString('en-IN')}"></div>`;
+  }).join('');
+  monthsEl.innerHTML = months.map((m,i) => `<div class="rev-month" style="color:${i===now?'var(--sfl)':'var(--mt)'}">${m}</div>`).join('');
+
+  // Recent users table
+  const recent = userList.slice(-5).reverse();
+  const tb = document.getElementById('recent-users-tb');
+  tb.innerHTML = recent.length ? recent.map(u => userRow(u)).join('') : '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--mt);font-style:italic">No users yet</td></tr>';
+
+  // Popular queries (mock)
+  const queries = JSON.parse(localStorage.getItem('deva_queries') || '[]');
+  const pq = document.getElementById('popular-queries');
+  if (queries.length === 0) {
+    pq.innerHTML = '<div style="background:var(--pn);border:1px solid var(--br);padding:20px;text-align:center;color:var(--mt);font-style:italic">No queries logged yet</div>';
+  } else {
+    pq.innerHTML = queries.slice(0,5).map(q => queryItem(q)).join('');
+  }
+}
+
+function getUsers() { return JSON.parse(localStorage.getItem('deva_users') || '{}'); }
+function getStats() { return JSON.parse(localStorage.getItem('deva_admin_stats') || '{"totalUsers":0,"totalQuestions":0,"revenue":0}'); }
+
+function userRow(u) {
+  const plan = u.plan || 'free';
+  const joined = u.joined ? new Date(u.joined).toLocaleDateString('en-IN') : '—';
+  return `<tr>
+    <td class="td-name">${u.name||'—'}</td>
+    <td class="td-email">${u.email}</td>
+    <td><span class="badge b-${plan}">${plan}</span></td>
+    <td style="font-size:12px;color:var(--dm)">${joined}</td>
+    <td style="font-family:'Cinzel',serif;font-size:11px;color:var(--gdl)">${u.totalQuestions||0}</td>
+    <td>
+      <div class="tbl-act">
+        <button class="ta-btn" onclick="editUser('${u.email}')">Edit</button>
+        <button class="ta-btn del" onclick="deleteUser('${u.email}')">Del</button>
+      </div>
+    </td>
+  </tr>`;
+}
+
+// ── USERS ──
+let allUsers = [];
+function loadUsers() {
+  const users = getUsers();
+  allUsers = Object.values(users);
+  renderUsers(allUsers);
+}
+
+function renderUsers(list) {
+  const tb = document.getElementById('users-tb');
+  if (!list.length) {
+    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--mt);font-style:italic">No users found</td></tr>';
+    return;
+  }
+  tb.innerHTML = list.map(u => {
+    const plan = u.plan || 'free';
+    const joined = u.joined ? new Date(u.joined).toLocaleDateString('en-IN') : '—';
+    return `<tr>
+      <td class="td-name">${u.name||'—'}</td>
+      <td class="td-email">${u.email}</td>
+      <td><span class="badge b-${plan}">${plan}</span></td>
+      <td style="font-size:12px;color:var(--dm)">${joined}</td>
+      <td style="font-family:'Cinzel',serif;color:var(--gdl)">${u.totalQuestions||0}</td>
+      <td><span class="badge b-active">Active</span></td>
+      <td>
+        <div class="tbl-act">
+          <button class="ta-btn" onclick="editUser('${u.email}')">Edit</button>
+          <button class="ta-btn del" onclick="deleteUser('${u.email}')">Del</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterUsers(q) {
+  const filtered = allUsers.filter(u =>
+    u.name?.toLowerCase().includes(q.toLowerCase()) ||
+    u.email?.toLowerCase().includes(q.toLowerCase())
+  );
+  renderUsers(filtered);
+}
+
+function filterByPlan(plan) {
+  if (plan === 'all') { renderUsers(allUsers); return; }
+  renderUsers(allUsers.filter(u => u.plan === plan));
+}
+
+function editUser(email) {
+  editingEmail = email;
+  const users = getUsers();
+  const u = users[email];
+  if (!u) return;
+  document.getElementById('edit-name').value = u.name || '';
+  document.getElementById('edit-plan').value = u.plan || 'free';
+  document.getElementById('edit-status').value = u.status || 'active';
+  document.getElementById('user-modal').classList.add('show');
+}
+
+function saveUserEdit() {
+  if (!editingEmail) return;
+  const users = getUsers();
+  if (!users[editingEmail]) return;
+  users[editingEmail].name = document.getElementById('edit-name').value;
+  users[editingEmail].plan = document.getElementById('edit-plan').value;
+  users[editingEmail].status = document.getElementById('edit-status').value;
+  localStorage.setItem('deva_users', JSON.stringify(users));
+  closeModal();
+  loadUsers();
+  showToast('✓ User updated');
+}
+
+function deleteUser(email) {
+  if (!confirm(`Delete user ${email}? This cannot be undone.`)) return;
+  const users = getUsers();
+  delete users[email];
+  localStorage.setItem('deva_users', JSON.stringify(users));
+  loadUsers();
+  showToast('User deleted');
+}
+
+function closeModal() {
+  document.getElementById('user-modal').classList.remove('show');
+}
+
+// ── SCRIPTURES ──
+let appVerses = JSON.parse(localStorage.getItem('deva_custom_verses') || '[]');
+
+function loadVerses() {
+  const tb = document.getElementById('verses-tb');
+  if (!appVerses.length) {
+    tb.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--mt);font-style:italic">No custom verses added yet. Built-in verses are in the app.</td></tr>';
+    return;
+  }
+  tb.innerHTML = appVerses.map((v,i) => `<tr>
+    <td class="td-name">${v.ref}</td>
+    <td><span class="badge b-free">${v.scripture}</span></td>
+    <td style="font-size:13px;color:var(--dm);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.san?.slice(0,50)||''}…</td>
+    <td style="font-size:12px;color:var(--dm)">${v.tags?.join(', ')||''}</td>
+    <td><div class="tbl-act"><button class="ta-btn del" onclick="deleteVerse(${i})">Del</button></div></td>
+  </tr>`).join('');
+}
+
+function addVerse() {
+  const ref = document.getElementById('sc-ref').value.trim();
+  const san = document.getElementById('sc-sanskrit').value.trim();
+  const trans = document.getElementById('sc-trans').value.trim();
+  const exp = document.getElementById('sc-exp').value.trim();
+  const tags = document.getElementById('sc-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  const scripture = document.getElementById('sc-scripture').value;
+
+  if (!ref || !san || !trans) return showToast('⚠ Fill Reference, Sanskrit, and Translation');
+
+  appVerses.push({ref, san, trans, exp, tags, scripture, added: new Date().toISOString()});
+  localStorage.setItem('deva_custom_verses', JSON.stringify(appVerses));
+  clearVerseForm();
+  loadVerses();
+  showToast('✦ Verse added to database');
+}
+
+function deleteVerse(i) {
+  appVerses.splice(i, 1);
+  localStorage.setItem('deva_custom_verses', JSON.stringify(appVerses));
+  loadVerses();
+  showToast('Verse deleted');
+}
+
+function clearVerseForm() {
+  ['sc-ref','sc-sanskrit','sc-trans','sc-exp','sc-tags'].forEach(id => document.getElementById(id).value = '');
+}
+
+// ── QUERIES ──
+function queryItem(q) {
+  return `<div class="query-item">
+    <div class="qi-top">
+      <div class="qi-user">${q.user || 'Anonymous'}</div>
+      <div class="qi-time">${q.time || '—'}</div>
+    </div>
+    <div class="qi-q">${q.question || '—'}</div>
+    <div class="qi-persona">${q.persona || 'Krishna Mode'}</div>
+  </div>`;
+}
+
+function loadQueries() {
+  const queries = JSON.parse(localStorage.getItem('deva_queries') || '[]');
+  const list = document.getElementById('queries-list');
+  if (!queries.length) {
+    list.innerHTML = '<div style="background:var(--pn);border:1px solid var(--br);padding:30px;text-align:center;color:var(--mt);font-style:italic">No queries logged yet. Queries will appear here as users interact with the app.</div>';
+    return;
+  }
+  list.innerHTML = queries.map(q => queryItem(q)).join('');
+}
+
+// ── SETTINGS ──
+function loadSettings() {
+  const cfg = JSON.parse(localStorage.getItem('deva_config') || '{}');
+  if (cfg.api) document.getElementById('cfg-api').value = cfg.api;
+  if (cfg.rzp) document.getElementById('cfg-rzp').value = cfg.rzp;
+  if (cfg.free_limit) document.getElementById('cfg-free-limit').value = cfg.free_limit;
+  if (cfg.model) document.getElementById('cfg-model').value = cfg.model;
+}
+
+function saveSetting(key) {
+  const cfg = JSON.parse(localStorage.getItem('deva_config') || '{}');
+  const vals = {
+    api: document.getElementById('cfg-api').value.trim(),
+    rzp: document.getElementById('cfg-rzp').value.trim(),
+    free_limit: document.getElementById('cfg-free-limit').value,
+    model: document.getElementById('cfg-model').value,
+    sadhaka_price: document.getElementById('cfg-sadhaka-price')?.value,
+    guru_price: document.getElementById('cfg-guru-price')?.value,
+  };
+  if (vals[key]) {
+    cfg[key] = vals[key];
+    // Sync API key to app
+    if (key === 'api') localStorage.setItem('deva_api', vals[key]);
+    localStorage.setItem('deva_config', JSON.stringify(cfg));
+    showToast('✓ ' + key.toUpperCase() + ' saved');
+  }
+}
+
+function toggleSetting(el, key) {
+  el.classList.toggle('on');
+  const cfg = JSON.parse(localStorage.getItem('deva_config') || '{}');
+  cfg[key] = el.classList.contains('on');
+  localStorage.setItem('deva_config', JSON.stringify(cfg));
+  showToast(key + ': ' + (cfg[key] ? 'Enabled' : 'Disabled'));
+}
+
+function resetAll() {
+  if (!confirm('Reset ALL demo data? This cannot be undone.')) return;
+  localStorage.removeItem('deva_users');
+  localStorage.removeItem('deva_admin_stats');
+  localStorage.removeItem('deva_queries');
+  localStorage.removeItem('deva_custom_verses');
+  loadDashboard();
+  showToast('All data reset');
+}
+
+function refreshData() {
+  const page = document.querySelector('.page.active')?.id?.replace('pg-','');
+  if (page === 'dashboard') loadDashboard();
+  if (page === 'users') loadUsers();
+  if (page === 'queries') loadQueries();
+  if (page === 'scriptures') loadVerses();
+  showToast('↻ Refreshed');
+}
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Close modal on bg click
+document.getElementById('user-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>

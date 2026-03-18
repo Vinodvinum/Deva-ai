@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deva AI — Complete Setup Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sf:#e8720c;--sfl:#f5a44a;--sfd:rgba(232,114,12,.12);
+  --gd:#c9943a;--gdl:#e8c070;
+  --dp:#05030a;--dk:#0c0816;--pn:#120f1e;
+  --br:rgba(232,114,12,.18);--brg:rgba(232,192,112,.2);
+  --tx:#f0e8d8;--dm:#9a8870;--mt:#4a4030;
+  --green:#1a5a2a;--greenl:#4abcaa;
+  --blue:#1a3a7a;--bluel:#6090e0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--dp);color:var(--tx);font-family:'EB Garamond',serif;font-size:16px;line-height:1.7;padding:0}
+.bg{position:fixed;inset:0;background:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(232,114,12,.12) 0%,transparent 60%);pointer-events:none;z-index:0}
+
+#app{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:40px 24px 80px}
+
+/* Header */
+.guide-header{text-align:center;padding:40px 0 50px;border-bottom:1px solid var(--br);margin-bottom:48px}
+.guide-logo{font-family:'Cinzel Decorative',serif;font-size:28px;color:var(--gdl);letter-spacing:3px;margin-bottom:8px}
+.guide-sub{font-family:'Cinzel',serif;font-size:10px;letter-spacing:4px;color:var(--sf);text-transform:uppercase;margin-bottom:14px}
+.guide-desc{font-size:17px;color:var(--dm);max-width:500px;margin:0 auto;font-style:italic}
+
+/* Phase cards */
+.phases{display:flex;flex-direction:column;gap:40px}
+
+.phase{background:var(--pn);border:1px solid var(--br);overflow:hidden}
+.phase-header{padding:18px 24px;border-bottom:1px solid var(--br);display:flex;align-items:center;gap:14px}
+.phase-num{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--sf);text-transform:uppercase;border:1px solid var(--sf);padding:3px 10px;border-radius:2px;white-space:nowrap}
+.phase-title{font-family:'Cinzel',serif;font-size:14px;letter-spacing:2px;color:var(--gdl);text-transform:uppercase}
+.phase-badge{margin-left:auto;font-family:'Cinzel',serif;font-size:8px;letter-spacing:1.5px;padding:3px 10px;border-radius:2px;border:1px solid;text-transform:uppercase;white-space:nowrap}
+.badge-easy{color:var(--greenl);border-color:rgba(74,188,170,.3);background:rgba(74,188,170,.08)}
+.badge-med{color:var(--sfl);border-color:rgba(232,114,12,.3);background:var(--sfd)}
+.badge-hard{color:#e87d94;border-color:rgba(232,125,148,.3);background:rgba(232,125,148,.08)}
+
+.phase-body{padding:24px}
+
+/* Steps */
+.steps{display:flex;flex-direction:column;gap:16px}
+.step{display:flex;gap:16px}
+.step-num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--sf),var(--gd));color:#05030a;font-family:'Cinzel',serif;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.step-content{flex:1}
+.step-title{font-family:'Cinzel',serif;font-size:11px;letter-spacing:1.5px;color:var(--gdl);text-transform:uppercase;margin-bottom:5px}
+.step-desc{font-size:14px;color:var(--dm);line-height:1.7;margin-bottom:8px}
+.step-desc strong{color:var(--tx)}
+
+/* Code blocks */
+.code{background:rgba(0,0,0,.5);border:1px solid rgba(232,114,12,.15);padding:14px 16px;font-family:'Courier New',monospace;font-size:13px;color:#a8d8a8;overflow-x:auto;white-space:pre;border-radius:3px;margin:8px 0;line-height:1.6}
+.code .comment{color:var(--mt)}
+.code .key{color:var(--sfl)}
+.code .val{color:#a8d8a8}
+.code .cmd{color:var(--gdl)}
+
+/* Info boxes */
+.info-box{padding:14px 16px;border-radius:3px;margin:10px 0;font-size:14px;line-height:1.7;border:1px solid}
+.info-tip{background:rgba(74,188,170,.06);border-color:rgba(74,188,170,.25);color:var(--greenl)}
+.info-tip::before{content:'💡 '}
+.info-warn{background:rgba(232,114,12,.06);border-color:rgba(232,114,12,.25);color:var(--sfl)}
+.info-warn::before{content:'⚠️ '}
+.info-note{background:rgba(96,144,224,.06);border-color:rgba(96,144,224,.25);color:var(--bluel)}
+.info-note::before{content:'📌 '}
+.info-cost{background:rgba(42,138,122,.06);border-color:rgba(42,138,122,.25);color:var(--greenl)}
+.info-cost::before{content:'💰 '}
+
+/* File structure */
+.file-tree{background:rgba(0,0,0,.4);border:1px solid var(--br);padding:16px 20px;font-family:'Courier New',monospace;font-size:13px;color:var(--dm);line-height:1.9;border-radius:3px}
+.file-tree .dir{color:var(--gdl)}
+.file-tree .file{color:var(--tx)}
+.file-tree .comment{color:var(--mt)}
+
+/* Checklist */
+.checklist{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.check-item{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--dm);line-height:1.6}
+.check-item::before{content:'☐';color:var(--sf);font-size:16px;flex-shrink:0;margin-top:1px}
+.check-item.done::before{content:'☑';color:var(--greenl)}
+.check-item strong{color:var(--tx)}
+
+/* Table */
+.guide-table{width:100%;border-collapse:collapse;font-size:14px;margin:12px 0}
+.guide-table th{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--gd);text-transform:uppercase;padding:10px 14px;text-align:left;border-bottom:1px solid var(--br);background:rgba(232,114,12,.04)}
+.guide-table td{padding:10px 14px;border-bottom:1px solid rgba(232,114,12,.06);color:var(--tx);vertical-align:top}
+.guide-table tr:last-child td{border-bottom:none}
+.guide-table td:first-child{font-family:'Cinzel',serif;font-size:11px;color:var(--gdl)}
+
+/* Divider */
+.divider{text-align:center;color:var(--sf);font-size:14px;letter-spacing:14px;margin:8px 0;opacity:.3}
+
+/* Button */
+.guide-btn{display:inline-block;padding:10px 22px;background:transparent;border:1px solid var(--sf);color:var(--sfl);font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:all .2s;border-radius:2px;margin-top:10px}
+.guide-btn:hover{background:var(--sfd)}
+.guide-btn.primary{background:linear-gradient(135deg,var(--sf),var(--gd));color:#05030a;border:none;font-weight:700}
+
+/* Summary grid */
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--br);margin-top:32px}
+@media(max-width:600px){.summary-grid{grid-template-columns:1fr}}
+.sg-card{background:var(--pn);padding:20px 16px;text-align:center}
+.sg-icon{font-size:28px;margin-bottom:8px;display:block}
+.sg-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--gdl);text-transform:uppercase;margin-bottom:5px}
+.sg-val{font-size:15px;color:var(--dm)}
+
+/* Footer */
+.guide-footer{text-align:center;padding:32px 0 0;border-top:1px solid var(--br);margin-top:48px;font-family:'Cinzel',serif;font-size:8px;letter-spacing:3px;color:var(--mt);text-transform:uppercase}
+.guide-footer strong{color:var(--sfl)}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div id="app">
+
+<div class="guide-header">
+  <div class="guide-logo">🪔 DEVA AI</div>
+  <div class="guide-sub">Complete Deployment & Publishing Guide</div>
+  <div class="guide-desc">Step-by-step guide to go from code to live app — Firebase, Vercel, Google Play Store & Apple App Store</div>
+</div>
+
+<div class="phases">
+
+<!-- ══ PHASE 1: FIREBASE ══ -->
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-num">Phase 1</div>
+    <div class="phase-title">Firebase Authentication Setup</div>
+    <div class="phase-badge badge-easy">~20 Minutes</div>
+  </div>
+  <div class="phase-body">
+    <div class="info-cost">Firebase free tier (Spark plan) is enough to start — supports up to 10,000 monthly active users with no cost!</div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Create Firebase Project</div>
+          <div class="step-desc">Go to <strong>console.firebase.google.com</strong> → Click <strong>"Add project"</strong> → Name it <strong>"deva-ai"</strong> → Disable Google Analytics (optional) → Click "Create Project"</div>
+          <div class="info-tip">Use your main Google account — this will be the owner of the project</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Enable Authentication</div>
+          <div class="step-desc">In Firebase Console → <strong>Authentication</strong> → <strong>Get Started</strong> → <strong>Sign-in method</strong> tab → Enable these providers:</div>
+          <div class="checklist">
+            <div class="check-item done"><strong>Google</strong> — Click Enable → Add your support email → Save</div>
+            <div class="check-item done"><strong>Email/Password</strong> — Click Enable → Save</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Create Firestore Database</div>
+          <div class="step-desc">Firebase Console → <strong>Firestore Database</strong> → <strong>Create database</strong> → Select <strong>"Start in production mode"</strong> → Choose region <strong>asia-south1 (Mumbai)</strong> → Done</div>
+          <div class="step-desc">Then go to <strong>Rules</strong> tab and paste these security rules:</div>
+          <div class="code"><span class="comment">// Firestore Security Rules — Paste in Firebase Console → Firestore → Rules</span>
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    <span class="comment">// Users can only read/write their own document</span>
+    match /users/{userId} {
+      allow read, write: if request.auth != null &amp;&amp; request.auth.uid == userId;
+    }
+    <span class="comment">// Admins can read all users</span>
+    match /users/{userId} {
+      allow read: if request.auth != null &amp;&amp;
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+    <span class="comment">// Queries log — users write their own, admin reads all</span>
+    match /queries/{queryId} {
+      allow create: if request.auth != null;
+      allow read: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+  }
+}</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Get Your Firebase Config</div>
+          <div class="step-desc">Firebase Console → <strong>Project Settings</strong> (⚙️ gear icon) → Scroll to <strong>"Your apps"</strong> → Click <strong>"Add app"</strong> → Select <strong>Web (&lt;/&gt;)</strong> → Register app → Copy the config object</div>
+          <div class="code"><span class="comment">// Your Firebase config will look like this:</span>
+<span class="key">const firebaseConfig</span> = {
+  <span class="val">apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXX",</span>
+  <span class="val">authDomain: "deva-ai-12345.firebaseapp.com",</span>
+  <span class="val">projectId: "deva-ai-12345",</span>
+  <span class="val">storageBucket: "deva-ai-12345.appspot.com",</span>
+  <span class="val">messagingSenderId: "123456789012",</span>
+  <span class="val">appId: "1:123456789012:web:abcdef1234567890"</span>
+};</div>
+          <div class="info-warn">Replace the firebaseConfig in deva-auth-firebase.html with YOUR values above</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <div class="step-title">Add Authorized Domains</div>
+          <div class="step-desc">Firebase Console → Authentication → Settings → <strong>Authorized domains</strong> → Add your Vercel domain:</div>
+          <div class="code">deva-ai.vercel.app
+your-custom-domain.com
+localhost  <span class="comment">(already added by default)</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-content">
+          <div class="step-title">Make Yourself Admin</div>
+          <div class="step-desc">After signing up with your email, go to Firebase Console → Firestore → <strong>users</strong> collection → Find your document → Edit → Add field <strong>isAdmin = true (boolean)</strong></div>
+          <div class="info-tip">The admin email admin@devaai.com is auto-set as admin. Change this to your email in deva-auth-firebase.html</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PHASE 2: VERCEL ══ -->
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-num">Phase 2</div>
+    <div class="phase-title">Vercel Deployment (Web App)</div>
+    <div class="phase-badge badge-easy">~15 Minutes</div>
+  </div>
+  <div class="phase-body">
+    <div class="info-cost">Vercel Hobby plan is completely FREE — includes custom domain, SSL, CDN, and 100GB bandwidth/month!</div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Prepare Your Project Files</div>
+          <div class="step-desc">Create a folder called <strong>deva-ai</strong> on your computer with this structure:</div>
+          <div class="file-tree"><span class="dir">deva-ai/</span>
+├── <span class="file">index.html</span>         <span class="comment">← rename deva-auth-firebase.html</span>
+├── <span class="file">app.html</span>           <span class="comment">← rename deva-ai.html</span>
+├── <span class="file">admin.html</span>         <span class="comment">← rename deva-admin.html</span>
+├── <span class="file">vercel.json</span>        <span class="comment">← routing config (below)</span>
+└── <span class="file">README.md</span>          <span class="comment">← optional</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Create vercel.json Config</div>
+          <div class="step-desc">Create a file called <strong>vercel.json</strong> in your project folder:</div>
+          <div class="code">{
+  "version": 2,
+  "routes": [
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/app", "dest": "/app.html" },
+    { "src": "/admin", "dest": "/admin.html" },
+    { "src": "/login", "dest": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    }
+  ]
+}</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Upload to GitHub</div>
+          <div class="step-desc">Go to <strong>github.com</strong> → Create a new repository called <strong>deva-ai</strong> (private) → Upload all your files</div>
+          <div class="code"><span class="comment"># If you have Git installed, run these commands in your project folder:</span>
+<span class="cmd">git init</span>
+<span class="cmd">git add .</span>
+<span class="cmd">git commit -m "Initial Deva AI deployment"</span>
+<span class="cmd">git remote add origin https://github.com/YOUR_USERNAME/deva-ai.git</span>
+<span class="cmd">git push -u origin main</span></div>
+          <div class="info-tip">If you don't know Git — use GitHub Desktop app or just drag-and-drop files on github.com</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Deploy on Vercel</div>
+          <div class="step-desc">1. Go to <strong>vercel.com</strong> → Sign up with GitHub<br>
+          2. Click <strong>"Add New Project"</strong><br>
+          3. Import your <strong>deva-ai</strong> GitHub repository<br>
+          4. Click <strong>"Deploy"</strong> — done!<br><br>
+          Your app will be live at: <strong>deva-ai.vercel.app</strong></div>
+          <div class="info-tip">Every time you push to GitHub, Vercel auto-deploys your new changes in ~30 seconds!</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <div class="step-title">Add Custom Domain (Optional)</div>
+          <div class="step-desc">Vercel Dashboard → Your Project → <strong>Settings</strong> → <strong>Domains</strong> → Add your domain (e.g. <strong>devaai.in</strong>)</div>
+          <div class="guide-table">
+            <table class="guide-table">
+              <thead><tr><th>Where to Buy</th><th>Price</th><th>Recommended Domain</th></tr></thead>
+              <tbody>
+                <tr><td>GoDaddy.com</td><td>~₹800/year</td><td>devaai.in</td></tr>
+                <tr><td>Namecheap.com</td><td>~₹600/year</td><td>devaai.app</td></tr>
+                <tr><td>Hostinger.in</td><td>~₹500/year</td><td>deva.ai (expensive!)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PHASE 3: ANDROID ══ -->
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-num">Phase 3</div>
+    <div class="phase-title">Google Play Store (Android App)</div>
+    <div class="phase-badge badge-med">~2–3 Days</div>
+  </div>
+  <div class="phase-body">
+    <div class="info-cost">Google Play registration: One-time $25 (≈₹2,100). After that, no monthly fees!</div>
+    <div class="info-note">We'll use Capacitor.js to wrap your HTML app into a native Android app — no need to rewrite in Java/Kotlin!</div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Install Required Tools</div>
+          <div class="step-desc">Install these on your computer (Windows/Mac/Linux):</div>
+          <div class="checklist">
+            <div class="check-item"><strong>Node.js</strong> — Download from nodejs.org (LTS version)</div>
+            <div class="check-item"><strong>Android Studio</strong> — Download from developer.android.com/studio</div>
+            <div class="check-item"><strong>Java JDK 17</strong> — Included with Android Studio</div>
+          </div>
+          <div class="code"><span class="comment"># After installing Node.js, install Capacitor globally:</span>
+<span class="cmd">npm install -g @capacitor/cli</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Initialize Capacitor Project</div>
+          <div class="code"><span class="comment"># Create a new folder and set up Capacitor:</span>
+<span class="cmd">mkdir deva-ai-mobile && cd deva-ai-mobile</span>
+<span class="cmd">npm init -y</span>
+<span class="cmd">npm install @capacitor/core @capacitor/cli @capacitor/android</span>
+<span class="cmd">npx cap init "Deva AI" "com.sushvinailabs.devaai" --web-dir www</span>
+
+<span class="comment"># Create www folder and copy your HTML files:</span>
+<span class="cmd">mkdir www</span>
+<span class="comment"># Copy index.html, app.html, admin.html into www/ folder</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Create capacitor.config.json</div>
+          <div class="code">{
+  "appId": "com.sushvinailabs.devaai",
+  "appName": "Deva AI",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#05030a",
+      "androidSplashResourceName": "splash",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#05030a"
+    }
+  }
+}</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Build Android Project</div>
+          <div class="code"><span class="cmd">npx cap add android</span>
+<span class="cmd">npx cap sync android</span>
+<span class="cmd">npx cap open android</span>
+<span class="comment"># This opens Android Studio automatically</span></div>
+          <div class="info-tip">In Android Studio, wait for Gradle sync to finish (first time takes 5–10 minutes)</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <div class="step-title">Configure App Icons & Splash Screen</div>
+          <div class="step-desc">In Android Studio, replace these files with your Deva AI branding:</div>
+          <div class="file-tree">android/app/src/main/res/
+├── <span class="dir">mipmap-hdpi/</span>
+│   └── <span class="file">ic_launcher.png</span>     <span class="comment">72×72px</span>
+├── <span class="dir">mipmap-mdpi/</span>
+│   └── <span class="file">ic_launcher.png</span>     <span class="comment">48×48px</span>
+├── <span class="dir">mipmap-xhdpi/</span>
+│   └── <span class="file">ic_launcher.png</span>     <span class="comment">96×96px</span>
+├── <span class="dir">mipmap-xxhdpi/</span>
+│   └── <span class="file">ic_launcher.png</span>     <span class="comment">144×144px</span>
+└── <span class="dir">mipmap-xxxhdpi/</span>
+    └── <span class="file">ic_launcher.png</span>     <span class="comment">192×192px</span></div>
+          <div class="info-tip">Use Android Asset Studio (romannurik.github.io/AndroidAssetStudio) to generate all icon sizes from one image</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-content">
+          <div class="step-title">Generate Signed APK / AAB</div>
+          <div class="step-desc">In Android Studio: <strong>Build</strong> menu → <strong>Generate Signed Bundle/APK</strong> → Select <strong>Android App Bundle (.aab)</strong> → Create new keystore (SAVE THE KEYSTORE FILE AND PASSWORD SAFELY!) → Build Release</div>
+          <div class="info-warn">Never lose your keystore file! You cannot update your app without it. Store it safely on Google Drive or external drive.</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">7</div>
+        <div class="step-content">
+          <div class="step-title">Publish to Google Play Store</div>
+          <div class="step-desc">
+          1. Go to <strong>play.google.com/console</strong> → Pay $25 registration<br>
+          2. Click <strong>"Create app"</strong> → Fill details<br>
+          3. Upload your <strong>.aab file</strong> to Internal Testing first<br>
+          4. Fill out Store Listing:<br></div>
+          <div class="guide-table">
+            <table class="guide-table">
+              <thead><tr><th>Field</th><th>What to Write</th></tr></thead>
+              <tbody>
+                <tr><td>App Name</td><td>Deva AI — Divine Wisdom</td></tr>
+                <tr><td>Short Description</td><td>AI-powered Vedic wisdom from Bhagavad Gita & scriptures</td></tr>
+                <tr><td>Category</td><td>Lifestyle → Religion & Spirituality</td></tr>
+                <tr><td>Content Rating</td><td>Everyone</td></tr>
+                <tr><td>Screenshots</td><td>Min 2 phone screenshots (1080×1920px)</td></tr>
+                <tr><td>Feature Graphic</td><td>1024×500px banner image</td></tr>
+              </tbody>
+            </table>
+          </div>
+          5. Submit for review — usually takes <strong>3–7 days</strong> for first app
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PHASE 4: iOS ══ -->
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-num">Phase 4</div>
+    <div class="phase-title">Apple App Store (iOS App)</div>
+    <div class="phase-badge badge-hard">~1 Week · Needs Mac</div>
+  </div>
+  <div class="phase-body">
+    <div class="info-warn">iOS development REQUIRES a Mac computer and Apple Developer account ($99/year ≈ ₹8,300/year)</div>
+    <div class="info-note">If you don't have a Mac, use a Mac cloud service like MacinCloud.com (~$30/month) for the build step only</div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Prerequisites (Mac only)</div>
+          <div class="checklist">
+            <div class="check-item"><strong>Xcode</strong> — Download free from Mac App Store</div>
+            <div class="check-item"><strong>Apple Developer Account</strong> — developer.apple.com ($99/year)</div>
+            <div class="check-item"><strong>Node.js & Capacitor</strong> — Same as Android setup</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Add iOS to Capacitor</div>
+          <div class="code"><span class="cmd">npm install @capacitor/ios</span>
+<span class="cmd">npx cap add ios</span>
+<span class="cmd">npx cap sync ios</span>
+<span class="cmd">npx cap open ios</span>
+<span class="comment"># This opens Xcode automatically</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Configure in Xcode</div>
+          <div class="step-desc">In Xcode → Select your project → <strong>Signing & Capabilities</strong> tab:</div>
+          <div class="checklist">
+            <div class="check-item">Set <strong>Bundle Identifier</strong>: com.sushvinailabs.devaai</div>
+            <div class="check-item">Select your <strong>Team</strong> (Apple Developer account)</div>
+            <div class="check-item">Set <strong>Version</strong>: 1.0.0 and <strong>Build</strong>: 1</div>
+            <div class="check-item">Add app icons in <strong>Assets.xcassets</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Archive & Upload to App Store Connect</div>
+          <div class="step-desc">In Xcode: <strong>Product</strong> → <strong>Archive</strong> → Organizer window → <strong>Distribute App</strong> → App Store Connect → Upload</div>
+          <div class="info-tip">First time setup takes longer. After first successful upload, subsequent updates are much faster.</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <div class="step-title">Submit on App Store Connect</div>
+          <div class="step-desc">Go to <strong>appstoreconnect.apple.com</strong>:</div>
+          <div class="guide-table">
+            <table class="guide-table">
+              <thead><tr><th>Field</th><th>What to Write</th></tr></thead>
+              <tbody>
+                <tr><td>App Name</td><td>Deva AI — Divine Wisdom</td></tr>
+                <tr><td>Subtitle</td><td>Vedic Wisdom & Dharma Guide</td></tr>
+                <tr><td>Category</td><td>Lifestyle (Primary), Education (Secondary)</td></tr>
+                <tr><td>Age Rating</td><td>4+ (no objectionable content)</td></tr>
+                <tr><td>Screenshots</td><td>6.5" iPhone screenshots (min 3)</td></tr>
+                <tr><td>Privacy Policy URL</td><td>Your website/privacy-policy page</td></tr>
+              </tbody>
+            </table>
+          </div>
+          Review takes <strong>1–3 days</strong> typically. First app may take up to 7 days.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PHASE 5: MONETIZATION ══ -->
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-num">Phase 5</div>
+    <div class="phase-title">Razorpay + In-App Payments Setup</div>
+    <div class="phase-badge badge-easy">~30 Minutes</div>
+  </div>
+  <div class="phase-body">
+    <div class="info-cost">Razorpay charges 2% per transaction. No monthly fees. Supports UPI, Cards, NetBanking, Wallets.</div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Create Razorpay Account</div>
+          <div class="checklist">
+            <div class="check-item">Go to <strong>razorpay.com</strong> → Sign up → Complete KYC</div>
+            <div class="check-item">KYC needs: <strong>Aadhaar + PAN + Bank account</strong></div>
+            <div class="check-item">Business type: Select <strong>"Individual"</strong> or register a company</div>
+            <div class="check-item">Approval takes 1–3 business days</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Get API Keys</div>
+          <div class="step-desc">Razorpay Dashboard → <strong>Settings</strong> → <strong>API Keys</strong> → Generate Test Key first, then Live Key after KYC approval</div>
+          <div class="code"><span class="comment">// In deva-auth-firebase.html, replace:</span>
+<span class="key">const RAZORPAY_KEY</span> = <span class="val">'rzp_live_XXXXXXXXXXXXXXXXX'</span>;
+
+<span class="comment">// For Play Store/App Store in-app purchases, use Razorpay Subscriptions API</span>
+<span class="comment">// or use Google Play Billing / Apple StoreKit instead (required for stores)</span></div>
+          <div class="info-warn">For mobile apps on Play Store / App Store, you MUST use Google Play Billing or Apple IAP for subscriptions. You cannot use Razorpay for in-app purchases in mobile apps — only for web.</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Revenue Projections</div>
+          <div class="guide-table">
+            <table class="guide-table">
+              <thead><tr><th>Scenario</th><th>Users</th><th>Revenue/Month</th><th>Costs</th><th>Profit</th></tr></thead>
+              <tbody>
+                <tr><td>Launch (Month 1)</td><td>100</td><td>₹5,000</td><td>~₹500</td><td>~₹4,500</td></tr>
+                <tr><td>Growing (Month 3)</td><td>500</td><td>₹25,000</td><td>~₹2,000</td><td>~₹23,000</td></tr>
+                <tr><td>Scaling (Month 6)</td><td>2,000</td><td>₹1,00,000</td><td>~₹8,000</td><td>~₹92,000</td></tr>
+                <tr><td>Established (Year 1)</td><td>10,000</td><td>₹5,00,000</td><td>~₹40,000</td><td>~₹4,60,000</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ QUICK CHECKLIST ══ -->
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-num">Summary</div>
+    <div class="phase-title">Complete Launch Checklist</div>
+    <div class="phase-badge badge-easy">Go Live!</div>
+  </div>
+  <div class="phase-body">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <div>
+        <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--gd);text-transform:uppercase;margin-bottom:12px">Firebase & Web</div>
+        <div class="checklist">
+          <div class="check-item">Create Firebase project</div>
+          <div class="check-item">Enable Google Auth + Email Auth</div>
+          <div class="check-item">Create Firestore database</div>
+          <div class="check-item">Add Firebase config to deva-auth-firebase.html</div>
+          <div class="check-item">Set admin email in auth file</div>
+          <div class="check-item">Upload to GitHub repository</div>
+          <div class="check-item">Deploy to Vercel</div>
+          <div class="check-item">Add authorized domain in Firebase</div>
+          <div class="check-item">Buy custom domain (optional)</div>
+          <div class="check-item">Set up Razorpay account</div>
+          <div class="check-item">Add Razorpay key to auth file</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--gd);text-transform:uppercase;margin-bottom:12px">Mobile Apps</div>
+        <div class="checklist">
+          <div class="check-item">Install Node.js + Android Studio</div>
+          <div class="check-item">Install Capacitor</div>
+          <div class="check-item">Create capacitor.config.json</div>
+          <div class="check-item">Build Android project</div>
+          <div class="check-item">Create app icons (all sizes)</div>
+          <div class="check-item">Generate signed .aab file</div>
+          <div class="check-item">Create Google Play Console account ($25)</div>
+          <div class="check-item">Upload .aab to Play Store</div>
+          <div class="check-item">Fill store listing + screenshots</div>
+          <div class="check-item">Submit for review</div>
+          <div class="check-item">[iOS] Set up Apple Developer account ($99)</div>
+          <div class="check-item">[iOS] Build with Xcode + submit</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- phases -->
+
+<div class="summary-grid">
+  <div class="sg-card"><span class="sg-icon">🔥</span><div class="sg-title">Firebase</div><div class="sg-val">Free up to 10K users/month</div></div>
+  <div class="sg-card"><span class="sg-icon">▲</span><div class="sg-title">Vercel</div><div class="sg-val">Free forever (Hobby plan)</div></div>
+  <div class="sg-card"><span class="sg-icon">📱</span><div class="sg-title">Play Store</div><div class="sg-val">$25 one-time fee</div></div>
+  <div class="sg-card"><span class="sg-icon">🍎</span><div class="sg-title">App Store</div><div class="sg-val">$99/year membership</div></div>
+  <div class="sg-card"><span class="sg-icon">💳</span><div class="sg-title">Razorpay</div><div class="sg-val">2% per transaction only</div></div>
+  <div class="sg-card"><span class="sg-icon">🤖</span><div class="sg-title">Claude API</div><div class="sg-val">~₹0.40 per AI response</div></div>
+</div>
+
+<div class="guide-footer">🪔 Deva AI Complete Setup Guide · Built by <strong>Sushvin AI Labs</strong> · 2025</div>
+
+</div><!-- app -->
+</body>
+</html>

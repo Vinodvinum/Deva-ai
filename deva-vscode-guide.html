@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deva AI — VS Code Setup Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sf:#e8720c;--sfl:#f5a44a;--sfd:rgba(232,114,12,.12);
+  --gd:#c9943a;--gdl:#e8c070;
+  --dp:#05030a;--dk:#0c0816;--pn:#120f1e;
+  --br:rgba(232,114,12,.18);--brg:rgba(232,192,112,.2);
+  --tx:#f0e8d8;--dm:#9a8870;--mt:#4a4030;
+  --greenl:#4abcaa;--bluel:#6090e0;--redl:#e87d94;
+  --vs:#1e1e2e;--vsbr:#3a3a5c;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--dp);color:var(--tx);font-family:'EB Garamond',serif;font-size:16px;line-height:1.7}
+.bg{position:fixed;inset:0;background:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(232,114,12,.1) 0%,transparent 60%);pointer-events:none;z-index:0}
+#app{position:relative;z-index:1;max-width:920px;margin:0 auto;padding:40px 24px 80px}
+
+/* Header */
+.header{text-align:center;padding:40px 0 48px;border-bottom:1px solid var(--br);margin-bottom:48px}
+.h-logo{font-family:'Cinzel Decorative',serif;font-size:24px;color:var(--gdl);letter-spacing:3px;margin-bottom:8px}
+.h-sub{font-family:'Cinzel',serif;font-size:9px;letter-spacing:4px;color:var(--sf);text-transform:uppercase;margin-bottom:14px}
+.h-desc{font-size:17px;color:var(--dm);max-width:520px;margin:0 auto;font-style:italic}
+
+/* Progress bar */
+.progress-bar{display:flex;gap:2px;margin-bottom:48px;background:var(--br)}
+.pb-step{flex:1;padding:12px 8px;background:var(--pn);text-align:center;cursor:pointer;transition:all .2s;border:1px solid transparent}
+.pb-step:hover{background:var(--sfd)}
+.pb-step.done{background:rgba(74,188,170,.08);border-color:rgba(74,188,170,.2)}
+.pb-step.active{background:var(--sfd);border-color:var(--sf)}
+.pb-num{font-family:'Cinzel',serif;font-size:16px;color:var(--gdl);display:block;margin-bottom:2px}
+.pb-step.done .pb-num{color:var(--greenl)}
+.pb-step.active .pb-num{color:var(--sfl)}
+.pb-label{font-family:'Cinzel',serif;font-size:7px;letter-spacing:1.5px;color:var(--mt);text-transform:uppercase}
+@media(max-width:600px){.pb-label{display:none}}
+
+/* Steps */
+.step-section{margin-bottom:40px}
+.step-card{background:var(--pn);border:1px solid var(--br);overflow:hidden;margin-bottom:16px}
+.step-card-header{padding:16px 22px;background:rgba(232,114,12,.06);border-bottom:1px solid var(--br);display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none}
+.sc-num{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--sf),var(--gd));color:#05030a;font-family:'Cinzel',serif;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sc-title{font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;color:var(--gdl);text-transform:uppercase;flex:1}
+.sc-badge{font-family:'Cinzel',serif;font-size:7px;letter-spacing:1.5px;padding:3px 10px;border-radius:2px;border:1px solid;text-transform:uppercase;white-space:nowrap}
+.b-easy{color:var(--greenl);border-color:rgba(74,188,170,.3);background:rgba(74,188,170,.06)}
+.b-med{color:var(--sfl);border-color:rgba(232,114,12,.3);background:var(--sfd)}
+.sc-toggle{color:var(--dm);font-size:14px;transition:transform .3s;flex-shrink:0}
+.step-card.open .sc-toggle{transform:rotate(180deg)}
+.step-card-body{display:none;padding:22px}
+.step-card.open .step-card-body{display:block}
+
+/* Content elements */
+.desc{font-size:15px;color:var(--dm);line-height:1.8;margin-bottom:14px}
+.desc strong{color:var(--tx)}
+.desc a{color:var(--sfl);text-decoration:none}
+.desc a:hover{text-decoration:underline}
+
+/* Download button */
+.dl-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;background:linear-gradient(135deg,var(--sf),var(--gd));border:none;color:#05030a;font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-weight:700;transition:all .3s;border-radius:3px;text-decoration:none;margin:6px 4px 6px 0}
+.dl-btn:hover{box-shadow:0 6px 20px rgba(232,114,12,.4);transform:translateY(-1px)}
+.dl-btn.sec{background:transparent;border:1px solid var(--brg);color:var(--gdl)}
+.dl-btn.sec:hover{background:var(--gdp)}
+
+/* VS Code screenshot simulation */
+.vscode-window{background:#1e1e2e;border:1px solid #3a3a5c;border-radius:6px;overflow:hidden;margin:14px 0;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.vs-titlebar{background:#12121f;padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #2a2a4a}
+.vs-dot{width:10px;height:10px;border-radius:50%}
+.vs-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1.5px;color:#6a6a8a;text-transform:uppercase;margin-left:auto;margin-right:auto}
+.vs-sidebar{display:flex;height:320px}
+.vs-explorer{width:180px;background:#161626;border-right:1px solid #2a2a4a;padding:8px 0;flex-shrink:0}
+.vs-exp-title{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:#6a6a8a;text-transform:uppercase;padding:6px 14px;margin-bottom:4px}
+.vs-file{padding:5px 14px;font-family:'Courier New',monospace;font-size:11px;color:#9a9ac0;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .15s}
+.vs-file:hover,.vs-file.active{background:#2a2a4a;color:#e0e0f0}
+.vs-file .fi{font-size:13px}
+.vs-file.folder{color:#e8c070}
+.vs-editor{flex:1;background:#1e1e2e;padding:16px;overflow:hidden}
+.vs-code{font-family:'Courier New',monospace;font-size:12px;line-height:1.7;color:#cdd6f4}
+.vs-code .ln{color:#454560;min-width:24px;display:inline-block;text-align:right;margin-right:12px;user-select:none}
+.vs-code .kw{color:#cba6f7}
+.vs-code .fn{color:#89b4fa}
+.vs-code .str{color:#a6e3a1}
+.vs-code .cm{color:#585b70;font-style:italic}
+.vs-code .hl{background:rgba(137,180,250,.1);display:block;border-left:2px solid #89b4fa;padding-left:4px;margin-left:-4px}
+
+/* Terminal simulation */
+.terminal{background:#0d1117;border:1px solid #30363d;border-radius:4px;padding:14px 16px;font-family:'Courier New',monospace;font-size:13px;margin:12px 0;overflow-x:auto}
+.t-line{line-height:1.8}
+.t-prompt{color:#4abcaa}
+.t-cmd{color:#e8c070}
+.t-out{color:#9a9a9a}
+.t-success{color:#4abcaa}
+.t-error{color:#e87d94}
+.t-cursor{display:inline-block;width:8px;height:14px;background:#e8c070;animation:blink 1s step-end infinite;vertical-align:middle}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* File tree */
+.file-tree{background:rgba(0,0,0,.4);border:1px solid var(--br);padding:14px 18px;font-family:'Courier New',monospace;font-size:13px;color:var(--dm);line-height:2;border-radius:3px;margin:10px 0}
+.ft-dir{color:var(--gdl)}
+.ft-file{color:var(--tx)}
+.ft-new{color:var(--sfl)}
+.ft-cm{color:var(--mt)}
+
+/* Code block */
+.code{background:rgba(0,0,0,.5);border:1px solid rgba(232,114,12,.15);padding:14px 16px;font-family:'Courier New',monospace;font-size:13px;color:#a8d8a8;overflow-x:auto;white-space:pre;border-radius:3px;margin:8px 0;line-height:1.6;position:relative}
+.code .cm{color:var(--mt)}
+.code .kw{color:#89b4fa}
+.code .str{color:#a6e3a1}
+.code .sf{color:var(--sfl)}
+.copy-btn{position:absolute;top:8px;right:8px;background:rgba(232,114,12,.15);border:1px solid var(--br);color:var(--dm);font-family:'Cinzel',serif;font-size:7px;letter-spacing:1px;padding:3px 8px;cursor:pointer;text-transform:uppercase;border-radius:2px;transition:all .2s}
+.copy-btn:hover{background:var(--sfd);color:var(--gdl)}
+.copy-btn.copied{color:var(--greenl);border-color:var(--greenl)}
+
+/* Checklist */
+.checklist{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.ci{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--dm);line-height:1.6;cursor:pointer;padding:8px 12px;border:1px solid transparent;border-radius:3px;transition:all .2s}
+.ci:hover{background:var(--sfd);border-color:var(--br)}
+.ci.checked{color:var(--greenl);background:rgba(74,188,170,.05);border-color:rgba(74,188,170,.2)}
+.ci-box{width:18px;height:18px;border:1.5px solid var(--sf);border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .2s;margin-top:2px}
+.ci.checked .ci-box{background:var(--greenl);border-color:var(--greenl);color:#000}
+.ci-text strong{color:var(--tx)}
+
+/* Info boxes */
+.info{padding:12px 16px;border-radius:3px;margin:10px 0;font-size:14px;line-height:1.7;border:1px solid;display:flex;gap:10px;align-items:flex-start}
+.info-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.info-tip{background:rgba(74,188,170,.06);border-color:rgba(74,188,170,.2);color:#c0f0e8}
+.info-warn{background:rgba(232,114,12,.06);border-color:rgba(232,114,12,.2);color:var(--sfl)}
+.info-note{background:rgba(96,144,224,.06);border-color:rgba(96,144,224,.2);color:#a0c0f0}
+.info-success{background:rgba(74,188,170,.08);border-color:rgba(74,188,170,.3);color:var(--greenl)}
+
+/* Extension cards */
+.ext-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+@media(max-width:500px){.ext-grid{grid-template-columns:1fr}}
+.ext-card{background:var(--dk);border:1px solid var(--br);padding:12px 14px;display:flex;gap:10px;align-items:flex-start;border-radius:3px}
+.ext-icon{font-size:22px;flex-shrink:0}
+.ext-name{font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;color:var(--gdl);text-transform:uppercase;margin-bottom:3px}
+.ext-desc{font-size:12px;color:var(--dm);line-height:1.5}
+.ext-must{font-family:'Cinzel',serif;font-size:7px;letter-spacing:1px;color:var(--sfl);border:1px solid var(--sf);padding:1px 6px;border-radius:2px;text-transform:uppercase;margin-left:6px}
+
+/* Section divider */
+.div-section{text-align:center;padding:8px 0;font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--mt);text-transform:uppercase;margin:8px 0}
+
+/* Table */
+.guide-table{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0}
+.guide-table th{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--gd);text-transform:uppercase;padding:9px 12px;text-align:left;border-bottom:1px solid var(--br);background:rgba(232,114,12,.04)}
+.guide-table td{padding:9px 12px;border-bottom:1px solid rgba(232,114,12,.06);color:var(--tx);vertical-align:top;font-size:13px}
+.guide-table td:first-child{font-family:'Cinzel',serif;font-size:10px;color:var(--gdl)}
+
+/* Footer */
+.footer{text-align:center;padding:32px 0 0;border-top:1px solid var(--br);margin-top:40px;font-family:'Cinzel',serif;font-size:8px;letter-spacing:3px;color:var(--mt);text-transform:uppercase}
+.footer strong{color:var(--sfl)}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;right:20px;z-index:200;background:rgba(12,8,22,.95);border:1px solid var(--gd);padding:10px 16px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:1.5px;color:var(--gdl);text-transform:uppercase;transform:translateY(60px);transition:transform .3s;border-radius:3px;pointer-events:none}
+.toast.show{transform:translateY(0)}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div id="app">
+
+<div class="header">
+  <div class="h-logo">🪔 DEVA AI</div>
+  <div class="h-sub">VS Code Complete Setup Guide</div>
+  <div class="h-desc">From zero to running project — everything you need to set up Deva AI in VS Code on your computer</div>
+</div>
+
+<!-- Progress -->
+<div class="progress-bar">
+  <div class="pb-step active" onclick="scrollTo('install')"><span class="pb-num">1</span><span class="pb-label">Install</span></div>
+  <div class="pb-step" onclick="scrollTo('project')"><span class="pb-num">2</span><span class="pb-label">Project</span></div>
+  <div class="pb-step" onclick="scrollTo('firebase')"><span class="pb-num">3</span><span class="pb-label">Firebase</span></div>
+  <div class="pb-step" onclick="scrollTo('run')"><span class="pb-num">4</span><span class="pb-label">Run</span></div>
+  <div class="pb-step" onclick="scrollTo('git')"><span class="pb-num">5</span><span class="pb-label">GitHub</span></div>
+  <div class="pb-step" onclick="scrollTo('deploy')"><span class="pb-num">6</span><span class="pb-label">Deploy</span></div>
+</div>
+
+<!-- ══ SECTION 1: INSTALL ══ -->
+<div id="install" class="step-section">
+  <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:4px;color:var(--sf);text-transform:uppercase;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--br)">
+    ✦ Step 1 — Install Everything
+  </div>
+
+  <div class="step-card open">
+    <div class="step-card-header" onclick="toggleCard(this)">
+      <div class="sc-num">A</div>
+      <div class="sc-title">Download & Install VS Code</div>
+      <div class="sc-badge b-easy">5 Minutes</div>
+      <div class="sc-toggle">▼</div>
+    </div>
+    <div class="step-card-body">
+      <div class="desc">VS Code is a free code editor by Microsoft. It's the best tool for editing your Deva AI files.</div>
+
+      <a href="https://code.visualstudio.com/download" target="_blank" class="dl-btn">⬇ Download VS Code</a>
+
+      <div class="div-section">Choose your operating system:</div>
+
+      <table class="guide-table">
+        <thead><tr><th>OS</th><th>Download</th><th>Install Steps</th></tr></thead>
+        <tbody>
+          <tr><td>🪟 Windows</td><td>VSCodeSetup-x64.exe</td><td>Double-click → Next → Next → Install → Finish</td></tr>
+          <tr><td>🍎 macOS</td><td>VSCode-darwin.zip</td><td>Unzip → Drag to Applications folder → Open</td></tr>
+          <tr><td>🐧 Linux</td><td>.deb or .rpm</td><td>sudo dpkg -i code_*.deb</td></tr>
+        </tbody>
+      </table>
+
+      <div class="info info-success"><span class="info-icon">✅</span>After installing, open VS Code — you'll see the welcome screen with a blue/dark interface</div>
+    </div>
+  </div>
+
+  <div class="step-card open">
+    <div class="step-card-header" onclick="toggleCard(this)">
+      <div class="sc-num">B</div>
+      <div class="sc-title">Install Required Extensions</div>
+      <div class="sc-badge b-easy">5 Minutes</div>
+      <div class="sc-toggle">▼</div>
+    </div>
+    <div class="step-card-body">
+      <div class="desc">Extensions add superpowers to VS Code. Install these by pressing <strong>Ctrl+Shift+X</strong> (Windows) or <strong>Cmd+Shift+X</strong> (Mac) to open Extensions panel, then search and install each one:</div>
+
+      <div class="ext-grid">
+        <div class="ext-card">
+          <span class="ext-icon">🌐</span>
+          <div><div class="ext-name">Live Server <span class="ext-must">Must Have</span></div><div class="ext-desc">Opens your HTML files in browser instantly with auto-reload when you save</div></div>
+        </div>
+        <div class="ext-card">
+          <span class="ext-icon">✨</span>
+          <div><div class="ext-name">Prettier <span class="ext-must">Must Have</span></div><div class="ext-desc">Auto-formats your code to look clean and organised</div></div>
+        </div>
+        <div class="ext-card">
+          <span class="ext-icon">🔥</span>
+          <div><div class="ext-name">Firebase Explorer</div><div class="ext-desc">View and manage your Firebase data directly from VS Code</div></div>
+        </div>
+        <div class="ext-card">
+          <span class="ext-icon">🎨</span>
+          <div><div class="ext-name">HTML CSS Support</div><div class="ext-desc">Auto-complete for HTML class names and CSS properties</div></div>
+        </div>
+        <div class="ext-card">
+          <span class="ext-icon">🐙</span>
+          <div><div class="ext-name">GitLens</div><div class="ext-desc">See Git history, who changed what, and manage branches visually</div></div>
+        </div>
+        <div class="ext-card">
+          <span class="ext-icon">🌈</span>
+          <div><div class="ext-name">Indent Rainbow</div><div class="ext-desc">Colours your code indentation — makes HTML/CSS much easier to read</div></div>
+        </div>
+        <div class="ext-card">
+          <span class="ext-icon">🔍</span>
+          <div><div class="ext-name">Auto Rename Tag</div><div class="ext-desc">When you rename an HTML opening tag, the closing tag renames too</div></div>
+        </div>
+        <div class="ext-card">
+          <span class="ext-icon">🌙</span>
+          <div><div class="ext-name">One Dark Pro Theme</div><div class="ext-desc">Beautiful dark theme for VS Code — easier on eyes for long coding sessions</div></div>
+        </div>
+      </div>
+
+      <div class="info info-tip"><span class="info-icon">💡</span>To install: Click Extensions icon (left sidebar) → Type extension name → Click the blue "Install" button</div>
+    </div>
+  </div>
+
+  <div class="step-card open">
+    <div class="step-card-header" onclick="toggleCard(this)">
+      <div class="sc-num">C</div>
+      <div class="sc-title">Install Node.js</div>
+      <div class="sc-badge b-easy">3 Minutes</div>
+      <div class="sc-toggle">▼</div>
+    </div>
+    <div class="step-card-body">
+      <div class="desc">Node.js is needed to run tools like live-server and to deploy your app. Download the <strong>LTS version</strong> (Long Term Support).</div>
+
+      <a href="https://nodejs.org" target="_blank" class="dl-btn">⬇ Download Node.js (LTS)</a>
+
+      <div class="desc" style="margin-top:14px">After installing, verify it works — open VS Code Terminal (<strong>Ctrl+`</strong> or <strong>View → Terminal</strong>) and type:</div>
+      <div class="terminal">
+        <div class="t-line"><span class="t-prompt">$ </span><span class="t-cmd">node --version</span></div>
+        <div class="t-line"><span class="t-out">v20.11.0</span></div>
+        <div class="t-line"><span class="t-prompt">$ </span><span class="t-cmd">npm --version</span></div>
+        <div class="t-line"><span class="t-out">10.2.4</span></div>
+      </div>
+      <div class="info info-success"><span class="info-icon">✅</span>If you see version numbers, Node.js is installed correctly!</div>
+    </div>
+  </div>
+
+  <div class="step-card open">
+    <div class="step-card-header" onclick="toggleCard(this)">
+      <div class="sc-num">D</div>
+      <div class="sc-title">Install Git</div>
+      <div class="sc-badge b-easy">3 Minutes</div>
+      <div class="sc-toggle">▼</div>
+    </div>
+    <div class="step-card-body">
+      <div class="desc">Git is used to save your code history and deploy to GitHub + Vercel.</div>
+      <a href="https://git-scm.com/downloads" target="_blank" class="dl-btn">⬇ Download Git</a>
+      <div class="desc" style="margin-top:14px">After installing, set up your identity in VS Code terminal:</div>
+      <div class="terminal">
+        <div class="t-line"><span class="t-prompt">$ </span><span class="t-cmd">git config --global user.name "Sushvin"</span></div>
+        <div class="t-line"><span class="t-prompt">$ </span><span class="t-cmd">git config --global user.email "your@email.com"</span></div>
+        <div class="t-line"><span class="t-prompt">$ </span><span class="t-cmd">git --version</span></div>
+        <div class="t-line"><span class="t-out">git version 2.44.0</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SECTION 2: PROJECT SETUP ══ -->
+<div id="project" class="step-section">
+  <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:4px;color:var(--sf);text-transform:uppercase;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--br)">
+    ✦ Step 2 — Set Up Your Project in VS Code
+  </div>
+
+  <div class="step-card open">
+    <div class="step-card-header" onclick="toggleCard(this)">
+      <div class="sc-num">1</div>
+      <div class="sc-title">Create Project Folder</div>
+      <div class="sc-badge b-easy">2 Minutes</div>
+      <div class="sc-toggle">▼</div>
+    </div>
+    <div class="step-card-body">
+      <div class="desc"><strong>Step 1:</strong> Create a new folder on your Desktop or Documents called <strong>deva-ai</strong></div>
+      <div class="desc"><strong>Step 2:</strong> Open VS Code → Click <strong>File → Open Folder</strong> → Select your <strong>deva-ai</strong> folder → Click "Select Folder"</div>
+
+      <div class="vscode-window">
+        <div class="vs-titlebar">
+          <div class="vs-dot" style="background:#ff5f57"></div>
+          <div class="vs-dot" style="background:#ffbd2e"></div>
+          <div class="vs-dot" style="background:#28c840"></div>
+          <div class="vs-title">VS Code — deva-ai</div>
+        </div>
+        <div class="vs-sidebar">
+          <div class="vs-explorer">
+            <div class="vs-exp-title">Explorer</div>
+            <div class="vs-file folder">📁 DEVA-AI</div>
+            <div class="vs-file active" style="padding-left:24px"><span class="fi">📄</span> index.html</div>
+            <div class="vs-file" style="padding-left:24px"><span class="fi">📄</span> app.html</div>
+            <div class="vs-file" style="padding-left:24px"><span class="fi">📄</span> admin.html</div>
+            <div class="vs-file" style="padding-left:24px"><span class="fi">📄</span> vercel.json</div>
+          </div>
+          <div class="vs-editor">
+            <div class="vs-code">
+              <span class="ln">1</span><span class="kw">&lt;!DOCTYPE</span> html<span class="kw">&gt;</span><br>
+              <span class="ln">2</span><span class="kw">&lt;html</span> lang=<span class="str">"en"</span><span class="kw">&gt;</span><br>
+              <span class="ln">3</span><span class="kw">&lt;head&gt;</span><br>
+              <span class="ln">4</span>  <span class="kw">&lt;meta</span> charset=<span class="str">"UTF-8"</span><span class="kw">&gt;</span><br>
+              <span class="ln">5</span>  <span class="kw">&lt;title&gt;</span>Deva AI<span class="kw">&lt;/title&gt;</span><br>
+              <span class="ln">6</span><span class="kw">&lt;/head&gt;</span><br>
+              <span class="ln">7</span><span class="cm">&lt;!-- Your code here --&gt;</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card open">
+    <div class="step-card-header" onclick="toggleCard(this)">
+      <div class="sc-num">2</div>
+      <div class="sc-title">Add Your Deva AI Files</div>
+      <div class="sc-badge b-easy">5 Minutes</div>
+      <div class="sc-toggle">▼</div>
+    </div>
+    <div class="step-card-body">
+      <div class="desc">Copy all your downloaded Deva AI HTML files into the project folder. Here is the exact structure:</div>
+
+      <div class="file-tree"><span class="ft-dir">deva-ai/</span>  ← Your main project folder
+│
+├── <span class="ft-new">index.html</span>          ← Copy of deva-auth-firebase.html (LOGIN PAGE)
+├── <span class="ft-new">app.html</span>            ← Copy of deva-ai.html (MAIN APP)
+├── <span class="ft-new">admin.html</span>          ← Copy of deva-admin.html (ADMIN DASHBOARD)
+├── <span class="ft-new">vercel.json</span>         ← Deployment config (create this — code below)
+└── <span class="ft-cm">README.md</span>           ← Optional description file</div>
+
+      <div class="desc" style="margin-top:14px"><strong>To rename files in VS Code:</strong><br>
+      Right-click the file in Explorer panel → Rename → Type new name → Enter</div>
+
+      <div class="info info-warn"><span class="info-icon">⚠️</span>Make sure the files link to each other correctly. In each HTML file, check that links say <strong>app.html</strong>, <strong>admin.html</strong>, <strong>index.html</strong> — not the old names</div>
+    </div>
+  </div>
+
+  <div class="step-card open">
+    <div class="step-card-header" onclick="toggleCard(this)">
+      <div class="sc-num">3</div>
+      <div class="sc-title">Create vercel.json File</div>
+      <div class="sc-badge b-easy">2 Minutes</div>
+      <div class="sc-toggle">▼</div>
+    </div>
+    <div class="step-card-body">
+      <div class="desc">In VS Code, press <strong>Ctrl+N</strong> (new file) → paste this code → Save as <strong>vercel.json</strong></div>
+      <div class="code" id="c1">{
+  "version": 2,
+  "routes": [
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/app", "dest": "/app.html" },
+    { "src": "/admin", "dest": "/admin.html" }
+  ]
+}
+<button class="copy-btn" onclick="copyCode('c1',this)">Copy</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SECTION 3: FIREBASE CONFIG ══ -->
+<div id="firebase" class="step-section">
+  <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:4px;color:var(--sf);text-transform:uppercase;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--br)">
+    ✦ Step 3 — Add Firebase Config to Your Code
+  </div>
+
+  <div class="step-card open">
+    <div class="step-card-header" onclick="toggleCard(this)">
+      <div class="sc-num">1</div>
+      <div class="sc-title">Open index.html and Find the Config Section</div>
+      <div class="sc-badge b-easy">2 Minutes</div>
+      <div class="sc-toggle">▼</div>
+    </div>
+    <div class="step-card-body">
+      <div class="desc">In VS Code, click on <strong>index.html</strong> in the Explorer panel. Press <strong>Ctrl+F</strong> to open Find, and search for:</div>
+      <div class="code" id="c2">YOUR_API_KEY<button class="copy-btn" onclick="copyCode('c2',this)">Copy</button></div>
+      <div class="desc">You will see this block at the top of the file — replace ALL the placeholder values with your real Firebase config:</div>
+      <div class="code" id="c3"><span class="cm">// BEFORE (placeholder values — won't work):</span>
+<span class="kw">const</span> firebaseConfig = {
+  apiKey: <span class="str">"YOUR_API_KEY"</span>,
+  authDomain: <span class="str">"YOUR_PROJECT.firebaseapp.com"</span>,
+  projectId: <span class="str">"YOUR_PROJECT_ID"</span>,
+  storageBucket: <span class="str">"YOUR_PROJECT.appspot.com"</span>,
+  messagingSenderId: <span class="str">"YOUR_SENDER_ID"</span>,
+  appId: <span class="str">"YOUR_APP_ID"</span>
+};
+
+<span class="cm">// AFTER (your real values from Firebase Console):</span>
+<span class="kw">const</span> firebaseConfig = {
+  apiKey: <span class="str">"AIzaSyD-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"</span>,
+  authDomain: <span class="str">"deva-ai-12345.firebaseapp.com"</span>,
+  projectId: <span class="str">"deva-ai-12345"</span>,
+  storageBucket: <span class="str">"deva-ai-12345.appspot.com"</span>,
+  messagingSenderId: <span class="str">"123456789012"</span>,
+  appId: <span class="str">"1:123456789012:web:abcdef1234567890"</span>
+};
+<button class="copy-btn" onclick="copyCode('c3',this)">Copy</button></div>
+      <div class="info info-tip"><span class="info-icon">💡</span>Get these values from: Firebase Console → Project Settings (⚙️) → Your Apps → Web App → SDK setup and configuration</div>
+    </div>
+  </div>
+
+  <div class="step-card open">
+    <div class="step-card-header" onclick="toggleCard(this)">
+      <div class="sc-num">2</div>
+      <div class="sc-title">Add Your Admin Email</div>
+      <div class="sc-badge b-easy">1 Minute</div>
+      <div class="sc-toggle">▼</div>
+    </div>
+    <div class="step-card-body">
+      <div class="desc">In <strong>index.html</strong>, press <strong>Ctrl+F</strong> and search for <code style="background:rgba(0,0,0,.3);padding:2px 6px;border-radius:2px;font-family:'Courier New',monospace;font-size:13px">admin@devaai.com</code> — replace it with your own email:</div>
+      <div class="code" id="c4"><span class="cm">// Find this line in index.html:</span>
+isAdmin: user.email === <span class="str">'admin@devaai.com'</span>,
+
+<span class="cm">// Change to YOUR email:</span>
+isAdmin: user.email === <span class="str">'youremail@gmail.com'</span>,
+<button class="copy-btn" onclick="copyCode('c4',this)">Copy</button></div>
+    </div>
+  </div>
+
+  <div class="step-card open">
+    <div class="step-card-header" onclick="toggleCard(this)">
+      <div class="sc-num">3</div>
+      <div class="sc-title">Add Razorpay Key</div>
+      <div class="sc-badge b-easy">1 Minute</div>
+      <div class="sc-toggle">▼</div>
+    </div>
+    <div class="step-card-body">
+      <div class="desc">In <strong>index.html</strong>, find <code style="background:rgba(0,0,0,.3);padding:2px 6px;border-radius:2px;font-family:'Courier New',monospace;font-size:13px">YOUR_RAZORPAY_KEY</code> and replace it:</div>
+      <div class="code" id="c5"><span class="cm">// Find this line:</span>
+<span class="kw">const</span> RAZORPAY_KEY = <span class="str">'YOUR_RAZORPAY_KEY'</span>;
+
+<span class="cm">// Replace with your actual key from razorpay.com:</span>
+<span class="kw">const</span> RAZORPAY_KEY = <span class="str">'rzp_live_XXXXXXXXXXXXXXXXX'</span>;
+<button class="copy-btn" onclick="copyCode('c5',this)">Copy</button></div>
+      <div class="info info-warn"><span class="info-icon">⚠️</span>Use <strong>rzp_test_</strong> key while testing, switch to <strong>rzp_live_</strong> when going live</div>
+    </div>
+  </div>
+
+  <div class="step-card open">
+    <div class="step-card-header" onclick="toggleCard(this)">
+      <div class="sc-num">4</div>
+      <div class="sc-title">Add Anthropic API Key to App</div>
+      <div class="sc-badge b-easy">1 Minute</div>
+      <div class="sc-toggle">▼</div>
+    </div>
+    <div class="step-card-body">
+      <div class="desc">Open <strong>app.html</strong> in VS Code. The API key is entered by users through the sidebar UI — but you can set a default for testing. In the app, the user pastes their Claude API key in the sidebar and it's saved to localStorage.</div>
+      <div class="info info-note"><span class="info-icon">📌</span>For a production app, you should move the API key to a backend server so users don't need to provide it. But for MVP/launch, the current system works fine.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SECTION 4: RUN LOCALLY ══ -->
+<div id="run" class="step-section">
+  <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:4px;color:var(--sf);text-transform:uppercase;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--br)">
+    ✦ Step 4 — Run & Test Locally
+  </div>
+
+  <div class="step-card open">
+    <div class="step-card-header" onclick="toggleCard(this)">
+      <div class="sc-num">1</div>
+      <div class="sc-title">Start Live Server</div>
+      <div class="sc-badge b-easy">30 Seconds</div>
+      <div class="sc-toggle">▼</div>
+    </div>
+    <div class="step-card-body">
+      <div class="desc">With <strong>index.html</strong> open in VS Code, look at the bottom status bar — you'll see <strong>"Go Live"</strong> button. Click it!</div>
+      <div class="desc">Your browser will open at <strong>http://127.0.0.1:5500/index.html</strong> — this is your app running locally!</div>
+
+      <div class="vscode-window">
+        <div class="vs-titlebar">
+          <div class="vs-dot" style="background:#ff5f57"></div>
+          <div class="vs-dot" style="background:#ffbd2e"></div>
+          <div class="vs-dot" style="background:#28c840"></div>
+          <div class="vs-title">index.html — deva-ai</div>
+        </div>
+        <div style="background:#1e1e2e;padding:12px 16px;font-family:'Courier New',monospace;font-size:11px;color:#cdd6f4;height:80px;display:flex;align-items:center">
+          <span style="color:#6a6a9a">Press </span>
+          <span style="background:#2a2a5a;padding:2px 8px;border-radius:3px;margin:0 6px;color:#89b4fa">Alt+L Alt+O</span>
+          <span style="color:#6a6a9a"> or click </span>
+          <span style="background:rgba(232,114,12,.2);padding:2px 8px;border-radius:3px;margin:0 6px;color:var(--sfl);border:1px solid var(--sf)">Go Live</span>
+          <span style="color:#6a6a9a"> in status bar</span>
+        </div>
+        <div style="background:#007acc;padding:5px 12px;font-family:'Courier New',monospace;font-size:10px;color:#fff;display:flex;justify-content:space-between">
+          <span>index.html</span>
+          <span style="background:rgba(255,255,255,.15);padding:2px 10px;border-radius:2px;cursor:pointer">🟢 Port: 5500</span>
+        </div>
+      </div>
+
+      <div class="info info-success"><span class="info-icon">✅</span>Every time you save a file (Ctrl+S), the browser auto-refreshes! No need to manually reload.</div>
+
+      <div class="info info-warn"><span class="info-icon">⚠️</span>Firebase Google Login won't work on localhost — you need to add <strong>localhost</strong> to Firebase authorized domains. Go to: Firebase Console → Authentication → Settings → Authorized domains → Add <strong>localhost</strong></div>
+    </div>
+  </div>
+
+  <div class="step-card open">
+    <div class="step-card-header" onclick="toggleCard(this)">
+      <div class="sc-num">2</div>
+      <div class="sc-title">Test All Pages</div>
+      <div class="sc-badge b-easy">5 Minutes</div>
+      <div class="sc-toggle">▼</div>
+    </div>
+    <div class="step-card-body">
+      <div class="checklist" id="test-checklist">
+        <div class="ci" onclick="toggleCheck(this)"><div class="ci-box"></div><div class="ci-text"><strong>Login page loads</strong> — Visit http://127.0.0.1:5500/index.html</div></div>
+        <div class="ci" onclick="toggleCheck(this)"><div class="ci-box"></div><div class="ci-text"><strong>Create account works</strong> — Sign up with email (check Firebase Console → Authentication to see the user appear)</div></div>
+        <div class="ci" onclick="toggleCheck(this)"><div class="ci-box"></div><div class="ci-text"><strong>Google login works</strong> — Click "Continue with Google" — browser popup should appear</div></div>
+        <div class="ci" onclick="toggleCheck(this)"><div class="ci-box"></div><div class="ci-text"><strong>App loads after login</strong> — Should redirect to app.html after successful login</div></div>
+        <div class="ci" onclick="toggleCheck(this)"><div class="ci-box"></div><div class="ci-text"><strong>Chat works</strong> — Add your Claude API key in sidebar → type a question → AI responds</div></div>
+        <div class="ci" onclick="toggleCheck(this)"><div class="ci-box"></div><div class="ci-text"><strong>Scripture explorer works</strong> — Click Scripture tab → select a verse → it shows detail</div></div>
+        <div class="ci" onclick="toggleCheck(this)"><div class="ci-box"></div><div class="ci-text"><strong>Admin dashboard</strong> — Login with your admin email → should redirect to admin.html</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card open">
+    <div class="step-card-header" onclick="toggleCard(this)">
+      <div class="sc-num">3</div>
+      <div class="sc-title">Common Errors & Fixes</div>
+      <div class="sc-badge b-med">Troubleshooting</div>
+      <div class="sc-toggle">▼</div>
+    </div>
+    <div class="step-card-body">
+      <table class="guide-table">
+        <thead><tr><th>Error</th><th>Cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td>Firebase: auth/unauthorized-domain</td><td>localhost not in allowed domains</td><td>Firebase Console → Auth → Settings → Add localhost</td></tr>
+          <tr><td>Firebase: invalid-api-key</td><td>Wrong config values</td><td>Double-check firebaseConfig in index.html</td></tr>
+          <tr><td>Blank white page</td><td>JavaScript error</td><td>Press F12 → Console tab → Read the red error</td></tr>
+          <tr><td>CORS error on API</td><td>API called from wrong origin</td><td>Add anthropic-dangerous-direct-browser-access header (already in code)</td></tr>
+          <tr><td>Page not redirecting after login</td><td>Wrong file names in href</td><td>Check that window.location.href points to correct filenames</td></tr>
+          <tr><td>Go Live not showing</td><td>Live Server extension not installed</td><td>Ctrl+Shift+X → Search "Live Server" → Install</td></tr>
+        </tbody>
+      </table>
+      <div class="info info-tip"><span class="info-icon">💡</span>Press <strong>F12</strong> in your browser to open Developer Tools → <strong>Console</strong> tab shows all errors in red. This is your best debugging tool!</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SECTION 5: GITHUB ══ -->
+<div id="git" class="step-section">
+  <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:4px;color:var(--sf);text-transform:uppercase;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--br)">
+    ✦ Step 5 — Push to GitHub
+  </div>
+
+  <div class="step-card open">
+    <div class="step-card-header" onclick="toggleCard(this)">
+      <div class="sc-num">1</div>
+      <div class="sc-title">Create GitHub Repository</div>
+      <div class="sc-badge b-easy">3 Minutes</div>
+      <div class="sc-toggle">▼</div>
+    </div>
+    <div class="step-card-body">
+      <div class="desc">1. Go to <strong>github.com</strong> → Sign up / Log in<br>
+      2. Click the <strong>+</strong> icon (top right) → <strong>New repository</strong><br>
+      3. Name: <strong>deva-ai</strong><br>
+      4. Select: <strong>Private</strong> (so your API keys are safe)<br>
+      5. Click <strong>Create repository</strong></div>
+      <div class="info info-warn"><span class="info-icon">⚠️</span>Never put your API keys directly in the code for a PUBLIC repository — always use Private repos or environment variables</div>
+    </div>
+  </div>
+
+  <div class="step-card open">
+    <div class="step-card-header" onclick="toggleCard(this)">
+      <div class="sc-num">2</div>
+      <div class="sc-title">Push Your Code from VS Code</div>
+      <div class="sc-badge b-easy">3 Minutes</div>
+      <div class="sc-toggle">▼</div>
+    </div>
+    <div class="step-card-body">
+      <div class="desc">Open VS Code Terminal (<strong>Ctrl+`</strong>) and run these commands one by one:</div>
+      <div class="terminal">
+        <div class="t-line"><span class="t-prompt">$ </span><span class="t-cmd">git init</span></div>
+        <div class="t-line"><span class="t-out">Initialized empty Git repository in /deva-ai/.git/</span></div>
+        <div class="t-line" style="margin-top:6px"><span class="t-prompt">$ </span><span class="t-cmd">git add .</span></div>
+        <div class="t-line"><span class="t-out">  (adds all files)</span></div>
+        <div class="t-line" style="margin-top:6px"><span class="t-prompt">$ </span><span class="t-cmd">git commit -m "Initial Deva AI launch"</span></div>
+        <div class="t-line"><span class="t-out">[main (root-commit) abc1234] Initial Deva AI launch</span></div>
+        <div class="t-line"><span class="t-out"> 4 files changed, 2847 insertions(+)</span></div>
+        <div class="t-line" style="margin-top:6px"><span class="t-prompt">$ </span><span class="t-cmd">git remote add origin https://github.com/YOUR_USERNAME/deva-ai.git</span></div>
+        <div class="t-line" style="margin-top:6px"><span class="t-prompt">$ </span><span class="t-cmd">git push -u origin main</span></div>
+        <div class="t-line"><span class="t-success">✓ Branch 'main' set up to track remote branch 'main' from 'origin'.</span></div>
+      </div>
+      <div class="info info-tip"><span class="info-icon">💡</span>Replace <strong>YOUR_USERNAME</strong> with your actual GitHub username. The URL is shown on your GitHub repository page after creating it.</div>
+
+      <div class="desc" style="margin-top:14px"><strong>For future changes</strong> — whenever you edit files, run:</div>
+      <div class="terminal">
+        <div class="t-line"><span class="t-prompt">$ </span><span class="t-cmd">git add .</span></div>
+        <div class="t-line"><span class="t-prompt">$ </span><span class="t-cmd">git commit -m "Updated chat feature"</span></div>
+        <div class="t-line"><span class="t-prompt">$ </span><span class="t-cmd">git push</span></div>
+        <div class="t-line"><span class="t-success">✓ Vercel auto-deploys in ~30 seconds!</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SECTION 6: VERCEL DEPLOY ══ -->
+<div id="deploy" class="step-section">
+  <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:4px;color:var(--sf);text-transform:uppercase;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--br)">
+    ✦ Step 6 — Deploy to Vercel (Go Live!)
+  </div>
+
+  <div class="step-card open">
+    <div class="step-card-header" onclick="toggleCard(this)">
+      <div class="sc-num">1</div>
+      <div class="sc-title">Connect GitHub to Vercel</div>
+      <div class="sc-badge b-easy">5 Minutes</div>
+      <div class="sc-toggle">▼</div>
+    </div>
+    <div class="step-card-body">
+      <div class="checklist">
+        <div class="ci" onclick="toggleCheck(this)"><div class="ci-box"></div><div class="ci-text">Go to <strong>vercel.com</strong> → Click "Sign up" → Choose <strong>"Continue with GitHub"</strong></div></div>
+        <div class="ci" onclick="toggleCheck(this)"><div class="ci-box"></div><div class="ci-text">Click <strong>"Add New Project"</strong> → Select <strong>"Import Git Repository"</strong></div></div>
+        <div class="ci" onclick="toggleCheck(this)"><div class="ci-box"></div><div class="ci-text">Find <strong>deva-ai</strong> in the list → Click <strong>"Import"</strong></div></div>
+        <div class="ci" onclick="toggleCheck(this)"><div class="ci-box"></div><div class="ci-text">Leave all settings as default → Click <strong>"Deploy"</strong></div></div>
+        <div class="ci" onclick="toggleCheck(this)"><div class="ci-box"></div><div class="ci-text">Wait 30–60 seconds → Your app is LIVE! 🎉</div></div>
+        <div class="ci" onclick="toggleCheck(this)"><div class="ci-box"></div><div class="ci-text">Go to Firebase → Auth → Authorized Domains → Add your <strong>.vercel.app</strong> URL</div></div>
+      </div>
+      <div class="info info-success"><span class="info-icon">🎉</span>Your Deva AI app is now live at <strong>deva-ai.vercel.app</strong> — share it with the world!</div>
+    </div>
+  </div>
+
+  <div class="step-card open">
+    <div class="step-card-header" onclick="toggleCard(this)">
+      <div class="sc-num">2</div>
+      <div class="sc-title">VS Code Shortcuts Cheat Sheet</div>
+      <div class="sc-badge b-easy">Reference</div>
+      <div class="sc-toggle">▼</div>
+    </div>
+    <div class="step-card-body">
+      <table class="guide-table">
+        <thead><tr><th>Action</th><th>Windows</th><th>Mac</th></tr></thead>
+        <tbody>
+          <tr><td>Open Terminal</td><td>Ctrl + `</td><td>Cmd + `</td></tr>
+          <tr><td>Find in file</td><td>Ctrl + F</td><td>Cmd + F</td></tr>
+          <tr><td>Find & Replace</td><td>Ctrl + H</td><td>Cmd + H</td></tr>
+          <tr><td>Find in all files</td><td>Ctrl + Shift + F</td><td>Cmd + Shift + F</td></tr>
+          <tr><td>Save file</td><td>Ctrl + S</td><td>Cmd + S</td></tr>
+          <tr><td>Save all files</td><td>Ctrl + K, S</td><td>Cmd + K, S</td></tr>
+          <tr><td>New file</td><td>Ctrl + N</td><td>Cmd + N</td></tr>
+          <tr><td>Open file</td><td>Ctrl + P</td><td>Cmd + P</td></tr>
+          <tr><td>Format code</td><td>Shift + Alt + F</td><td>Shift + Option + F</td></tr>
+          <tr><td>Toggle sidebar</td><td>Ctrl + B</td><td>Cmd + B</td></tr>
+          <tr><td>Command palette</td><td>Ctrl + Shift + P</td><td>Cmd + Shift + P</td></tr>
+          <tr><td>Start Live Server</td><td>Alt + L, Alt + O</td><td>Cmd + L, Cmd + O</td></tr>
+          <tr><td>Undo</td><td>Ctrl + Z</td><td>Cmd + Z</td></tr>
+          <tr><td>Multi-cursor</td><td>Alt + Click</td><td>Option + Click</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Final Summary -->
+<div style="background:var(--pn);border:1px solid var(--brg);padding:28px;text-align:center;margin-top:8px">
+  <div style="font-family:'Cinzel Decorative',serif;font-size:20px;color:var(--gdl);margin-bottom:10px">🪔 You're Ready!</div>
+  <div style="font-size:16px;color:var(--dm);margin-bottom:20px;font-style:italic">Your Deva AI is set up in VS Code and deployed to the world</div>
+  <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
+    <a href="deva-setup-guide.html" class="dl-btn">📖 Full Deployment Guide</a>
+    <a href="deva-auth-firebase.html" class="dl-btn sec">🔐 Auth File</a>
+    <a href="deva-ai.html" class="dl-btn sec">🪔 Main App</a>
+    <a href="deva-admin.html" class="dl-btn sec">📊 Admin</a>
+  </div>
+</div>
+
+<div class="footer">🪔 Deva AI VS Code Guide · Built by <strong>Sushvin AI Labs</strong> · 2025</div>
+
+</div><!-- app -->
+<div class="toast" id="toast"></div>
+
+<script>
+function toggleCard(header) {
+  const card = header.closest('.step-card');
+  card.classList.toggle('open');
+}
+
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  if (el.classList.contains('checked')) {
+    el.querySelector('.ci-box').textContent = '✓';
+  } else {
+    el.querySelector('.ci-box').textContent = '';
+  }
+}
+
+function copyCode(id, btn) {
+  const el = document.getElementById(id);
+  const text = el.innerText.replace('Copy','').replace('Copied!','').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function scrollTo(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+let toastT;
+function showToast(m) {
+  const t = document.getElementById('toast');
+  t.textContent = m; t.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Auto-open all cards
+document.querySelectorAll('.step-card').forEach(c => c.classList.add('open'));
+</script>
+</body>
+</html>

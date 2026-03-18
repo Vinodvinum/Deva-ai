@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deva AI — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=EB+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+
+<!-- ═══════════════════════════════════════════
+  FIREBASE SDK — Replace config below with YOUR Firebase project config
+  Get it from: Firebase Console → Project Settings → Your Apps → SDK setup
+═══════════════════════════════════════════ -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  window._firebaseReadyPromise = (async () => {
+    try {
+      const cfgResp = await fetch('/api/public-config', { cache: 'no-store' });
+      const cfgData = await cfgResp.json().catch(() => ({}));
+      if (!cfgResp.ok) throw new Error(cfgData.error || 'Failed to load runtime config.');
+
+      const firebaseConfig = cfgData.firebaseConfig || {};
+      if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId || !firebaseConfig.appId) {
+        throw new Error('Firebase config is incomplete. Set env vars in Vercel.');
+      }
+
+      window._devaRuntimeConfig = {
+        adminEmail: (cfgData.adminEmail || 'admin@devaai.com').toLowerCase(),
+        razorpayKey: cfgData.razorpayKey || ''
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+      const googleProvider = new GoogleAuthProvider();
+
+      window._firebaseAuth = auth;
+      window._firebaseDb = db;
+      window._googleProvider = googleProvider;
+      window._firebaseFns = {
+        signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword,
+        signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged,
+        updateProfile, doc, setDoc, getDoc, serverTimestamp
+      };
+
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) return;
+        const fns = window._firebaseFns;
+        const userDocRef = fns.doc(db, 'users', user.uid);
+        const userDoc = await fns.getDoc(userDocRef);
+        if (!userDoc.exists()) return;
+
+        const userData = userDoc.data();
+        localStorage.setItem('deva_current_user', JSON.stringify({
+          uid: user.uid,
+          name: user.displayName || userData.name,
+          email: user.email,
+          plan: userData.plan || 'free',
+          isAdmin: userData.isAdmin || false,
+          photoURL: user.photoURL
+        }));
+        if (userData.isAdmin) window.location.href = 'admin.html';
+        else window.location.href = 'app.html';
+      });
+      return true;
+    } catch (err) {
+      window._firebaseInitError = err?.message || 'Firebase init failed';
+      console.error(err);
+      return false;
+    }
+  })();
+</script>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<style>
+:root{
+  --sf:#e8720c;--sfl:#f5a44a;--sfd:rgba(232,114,12,.15);
+  --gd:#c9943a;--gdl:#e8c070;--gdp:rgba(232,192,112,.1);
+  --dp:#05030a;--dk:#0c0816;--pn:#120f1e;
+  --br:rgba(232,114,12,.18);--brg:rgba(232,192,112,.2);
+  --tx:#f0e8d8;--dm:#9a8870;--mt:#3a3428;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--dp);color:var(--tx);font-family:'EB Garamond',serif;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+.bg{position:fixed;inset:0;pointer-events:none;z-index:0}
+.bg::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 50% at 50% -5%,rgba(232,114,12,.18) 0%,transparent 60%),
+  radial-gradient(ellipse 50% 40% at 90% 100%,rgba(196,85,106,.1) 0%,transparent 50%)}
+.bg::after{content:'';position:absolute;inset:0;
+  background-image:
+  radial-gradient(1px 1px at 10% 15%,rgba(255,220,180,.4) 0%,transparent 100%),
+  radial-gradient(1px 1px at 30% 45%,rgba(255,200,150,.3) 0%,transparent 100%),
+  radial-gradient(2px 2px at 88% 20%,rgba(255,210,160,.35) 0%,transparent 100%),
+  radial-gradient(1px 1px at 20% 80%,rgba(255,220,180,.3) 0%,transparent 100%)}
+#app{position:relative;z-index:1;flex:1;display:flex;flex-direction:column}
+nav{padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--br);background:rgba(5,3,10,.7);backdrop-filter:blur(12px)}
+.nav-logo{font-family:'Cinzel Decorative',serif;font-size:18px;color:var(--gdl);letter-spacing:2px;display:flex;align-items:center;gap:8px;text-decoration:none}
+.nav-logo span{animation:flame 2.5s ease-in-out infinite;filter:drop-shadow(0 0 6px rgba(232,114,12,.5))}
+@keyframes flame{0%,100%{filter:drop-shadow(0 0 4px rgba(232,114,12,.5))}50%{filter:drop-shadow(0 0 14px rgba(232,192,112,.8))}}
+.main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+.auth-wrap{width:100%;max-width:460px}
+.auth-tabs{display:flex;margin-bottom:2px;background:var(--br)}
+.auth-tab{flex:1;padding:14px;background:var(--pn);font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--dm);text-transform:uppercase;cursor:pointer;transition:all .2s;border:1px solid transparent;text-align:center}
+.auth-tab.active{background:var(--sfd);border-color:var(--sf);color:var(--sfl)}
+.auth-card{background:var(--pn);border:1px solid var(--br);padding:36px 34px 40px;position:relative}
+.auth-card::before,.auth-card::after{content:'✦';position:absolute;font-size:10px;color:var(--gd);opacity:.35}
+.auth-card::before{top:12px;left:14px}.auth-card::after{bottom:12px;right:14px}
+.auth-logo{text-align:center;margin-bottom:28px}
+.auth-logo-icon{font-size:36px;display:block;margin-bottom:8px;filter:drop-shadow(0 0 12px rgba(232,114,12,.4))}
+.auth-logo-text{font-family:'Cinzel Decorative',serif;font-size:22px;color:var(--gdl);letter-spacing:3px}
+.auth-tagline{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--dm);margin-top:4px}
+.form-panel{display:none}.form-panel.active{display:block}
+.field{margin-bottom:18px}
+.field label{display:block;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--dm);text-transform:uppercase;margin-bottom:7px}
+.field input{width:100%;background:var(--dk);border:1px solid var(--br);color:var(--tx);font-family:'EB Garamond',serif;font-size:15px;padding:11px 14px;outline:none;transition:border-color .2s;border-radius:2px}
+.field input:focus{border-color:var(--sf)}
+.field input::placeholder{color:var(--mt)}
+.plan-opts{display:flex;flex-direction:column;gap:8px}
+.plan-opt{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--dk);border:1px solid var(--br);cursor:pointer;transition:all .2s;border-radius:2px}
+.plan-opt:hover,.plan-opt.sel{border-color:var(--sf);background:var(--sfd)}
+.plan-opt input[type=radio]{accent-color:var(--sf);width:14px;height:14px}
+.plan-opt-info{flex:1}
+.plan-opt-name{font-family:'Cinzel',serif;font-size:11px;color:var(--gdl);letter-spacing:1px;text-transform:uppercase}
+.plan-opt-desc{font-size:12px;color:var(--dm);margin-top:2px}
+.plan-opt-price{font-family:'Cinzel',serif;font-size:16px;color:var(--sfl)}
+.divider-text{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--mt);font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;text-transform:uppercase}
+.divider-text::before,.divider-text::after{content:'';flex:1;height:1px;background:var(--br)}
+.btn-primary{width:100%;padding:14px;background:linear-gradient(135deg,var(--sf),var(--gd));border:none;color:#05030a;font-family:'Cinzel',serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;font-weight:700;transition:all .3s;border-radius:2px}
+.btn-primary:hover{box-shadow:0 8px 24px rgba(232,114,12,.4);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-google{width:100%;padding:13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.15);color:var(--tx);font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;border-radius:2px;margin-bottom:4px}
+.btn-google:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3)}
+.auth-err{background:rgba(139,32,32,.15);border:1px solid rgba(180,60,60,.3);padding:10px 14px;color:#ffaaaa;font-size:13px;margin-bottom:14px;display:none;border-radius:2px}
+.auth-success{background:rgba(30,100,50,.15);border:1px solid rgba(60,160,80,.3);padding:10px 14px;color:#a0ffb8;font-size:13px;margin-bottom:14px;display:none;border-radius:2px}
+.auth-footer{text-align:center;margin-top:20px;font-size:13px;color:var(--dm);font-family:'Cormorant Garamond',serif}
+.auth-footer a{color:var(--sfl);text-decoration:none}
+.terms{font-size:12px;color:var(--mt);text-align:center;margin-top:14px;line-height:1.6}
+.terms a{color:var(--dm);text-decoration:none}
+.free-badge{font-family:'Cinzel',serif;font-size:7px;letter-spacing:1px;background:rgba(42,138,122,.2);border:1px solid rgba(42,138,122,.4);color:#7fffc8;padding:2px 7px;border-radius:2px;margin-left:6px;text-transform:uppercase}
+.pro-badge{font-family:'Cinzel',serif;font-size:7px;letter-spacing:1px;background:var(--sfd);border:1px solid var(--sf);color:var(--sfl);padding:2px 7px;border-radius:2px;margin-left:6px;text-transform:uppercase}
+.load-overlay{display:none;position:fixed;inset:0;background:rgba(5,3,10,.9);z-index:100;align-items:center;justify-content:center;flex-direction:column;gap:20px}
+.load-overlay.show{display:flex}
+.spin{width:50px;height:50px;border:1px solid var(--br);border-top-color:var(--sf);border-radius:50%;animation:spin 1.2s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-text{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--sfl);text-transform:uppercase}
+footer{padding:20px 32px;border-top:1px solid var(--br);text-align:center;font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--mt);text-transform:uppercase}
+footer strong{color:var(--sfl)}
+.toast{position:fixed;bottom:20px;right:20px;z-index:200;background:rgba(12,8,22,.95);border:1px solid var(--gd);padding:10px 16px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:1.5px;color:var(--gdl);text-transform:uppercase;transform:translateY(60px);transition:transform .3s;border-radius:3px}
+.toast.show{transform:translateY(0)}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div id="app">
+<nav>
+  <a href="#" class="nav-logo"><span>🪔</span> DEVA AI</a>
+  <a href="app.html" style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--dm);text-decoration:none;text-transform:uppercase">← Back to App</a>
+</nav>
+<div class="main">
+  <div class="auth-wrap">
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchTab('login')">Sign In</div>
+      <div class="auth-tab" onclick="switchTab('signup')">Create Account</div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-logo">
+        <span class="auth-logo-icon">🪔</span>
+        <div class="auth-logo-text">DEVA AI</div>
+        <div class="auth-tagline">Ancient Wisdom · Modern Intelligence</div>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="form-panel active" id="panel-login">
+        <div class="auth-err" id="login-err"></div>
+        <button class="btn-google" onclick="googleLogin()">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continue with Google
+        </button>
+        <div class="divider-text">or email</div>
+        <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="your@email.com"></div>
+        <div class="field"><label>Password</label><input type="password" id="login-pass" placeholder="Your password"></div>
+        <div style="text-align:right;margin-bottom:18px">
+          <a href="#" style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--dm);text-transform:uppercase" onclick="forgotPassword()">Forgot Password?</a>
+        </div>
+        <button class="btn-primary" onclick="emailLogin()">✦ &nbsp; Sign In &nbsp; ✦</button>
+        <div class="auth-footer" style="margin-top:16px">No account? <a href="#" onclick="switchTab('signup')">Create one free</a></div>
+      </div>
+
+      <!-- SIGNUP -->
+      <div class="form-panel" id="panel-signup">
+        <div class="auth-err" id="signup-err"></div>
+        <button class="btn-google" onclick="googleLogin()">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Sign up with Google
+        </button>
+        <div class="divider-text">or email</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">
+          <div class="field" style="margin:0"><label>First Name</label><input type="text" id="su-fname" placeholder="Arjuna"></div>
+          <div class="field" style="margin:0"><label>Last Name</label><input type="text" id="su-lname" placeholder="Kumar"></div>
+        </div>
+        <div class="field"><label>Email</label><input type="email" id="su-email" placeholder="your@email.com"></div>
+        <div class="field"><label>Password (min 8 chars)</label><input type="password" id="su-pass" placeholder="Create a strong password"></div>
+        <div style="margin-bottom:14px">
+          <label style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--dm);text-transform:uppercase;display:block;margin-bottom:10px">Choose Your Path</label>
+          <div class="plan-opts">
+            <div class="plan-opt sel" onclick="selectPlan('free',this)"><input type="radio" name="plan" value="free" checked><div class="plan-opt-info"><div class="plan-opt-name">Shishya<span class="free-badge">Free</span></div><div class="plan-opt-desc">10 questions/day · Basic features</div></div><div class="plan-opt-price">₹0</div></div>
+            <div class="plan-opt" onclick="selectPlan('sadhaka',this)"><input type="radio" name="plan" value="sadhaka"><div class="plan-opt-info"><div class="plan-opt-name">Sadhaka<span class="pro-badge">Popular</span></div><div class="plan-opt-desc">Unlimited · All personas · Voice</div></div><div class="plan-opt-price">₹199/mo</div></div>
+            <div class="plan-opt" onclick="selectPlan('guru',this)"><input type="radio" name="plan" value="guru"><div class="plan-opt-info"><div class="plan-opt-name">Guru</div><div class="plan-opt-desc">Everything + API + White-label</div></div><div class="plan-opt-price">₹499/mo</div></div>
+          </div>
+        </div>
+        <button class="btn-primary" id="su-btn" onclick="emailSignup()">✦ &nbsp; Create Account &nbsp; ✦</button>
+        <div class="terms">By creating an account you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+<footer>© 2025 Deva AI · Built by <strong>Sushvin AI Labs</strong></footer>
+</div>
+
+<div class="load-overlay" id="loader"><div class="spin"></div><div class="load-text" id="load-txt">Signing you in…</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+let selectedPlan = 'free';
+const DEFAULT_ADMIN_EMAIL = 'admin@devaai.com';
+
+function getAdminEmail() {
+  return (window._devaRuntimeConfig?.adminEmail || DEFAULT_ADMIN_EMAIL).toLowerCase();
+}
+
+function getRazorpayKey() {
+  return window._devaRuntimeConfig?.razorpayKey || '';
+}
+
+async function ensureFirebaseReady() {
+  if (window._firebaseReadyPromise) await window._firebaseReadyPromise;
+  if (!window._firebaseAuth) {
+    showToast('⚠ ' + (window._firebaseInitError || 'Firebase is not configured yet.'));
+    return false;
+  }
+  return true;
+}
+
+function switchTab(t) {
+  document.querySelectorAll('.auth-tab').forEach((el,i)=>el.classList.toggle('active',(t==='login'&&i===0)||(t==='signup'&&i===1)));
+  document.getElementById('panel-login').classList.toggle('active',t==='login');
+  document.getElementById('panel-signup').classList.toggle('active',t==='signup');
+}
+
+function selectPlan(p, el) {
+  selectedPlan = p;
+  document.querySelectorAll('.plan-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+  el.querySelector('input[type=radio]').checked = true;
+  const btn = document.getElementById('su-btn');
+  if (p==='free') btn.textContent='✦  Create Free Account  ✦';
+  else if (p==='sadhaka') btn.textContent='✦  Create Account & Pay ₹199  ✦';
+  else btn.textContent='✦  Create Account & Pay ₹499  ✦';
+}
+
+function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block'}
+function hideErrs(){['login-err','signup-err'].forEach(id=>document.getElementById(id).style.display='none')}
+function showLoader(t){document.getElementById('load-txt').textContent=t;document.getElementById('loader').classList.add('show')}
+function hideLoader(){document.getElementById('loader').classList.remove('show')}
+let toastT;
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2500)}
+
+// ── FIREBASE HELPERS ──
+async function saveUserToFirestore(user, extraData = {}) {
+  const db = window._firebaseDb;
+  const fns = window._firebaseFns;
+  const userRef = fns.doc(db, 'users', user.uid);
+  const existing = await fns.getDoc(userRef);
+  if (!existing.exists()) {
+    await fns.setDoc(userRef, {
+      uid: user.uid,
+      name: user.displayName || (extraData.name || 'User'),
+      email: user.email,
+      plan: extraData.plan || 'free',
+      paymentId: extraData.paymentId || null,
+      isAdmin: (user.email || '').toLowerCase() === getAdminEmail(),
+      status: 'active',
+      questionsToday: 0,
+      totalQuestions: 0,
+      lastQuestionDate: '',
+      joined: fns.serverTimestamp(),
+      bookmarks: []
+    });
+  }
+  const doc = await fns.getDoc(userRef);
+  return doc.data();
+}
+
+async function loginSuccess(firebaseUser) {
+  hideLoader();
+  const userData = await saveUserToFirestore(firebaseUser);
+  localStorage.setItem('deva_current_user', JSON.stringify({
+    uid: firebaseUser.uid,
+    name: firebaseUser.displayName || userData.name,
+    email: firebaseUser.email,
+    plan: userData.plan || 'free',
+    isAdmin: userData.isAdmin || false,
+    photoURL: firebaseUser.photoURL
+  }));
+  showToast('🪔 Welcome ' + (firebaseUser.displayName?.split(' ')[0] || 'Seeker') + '!');
+  setTimeout(() => {
+    if (userData.isAdmin) window.location.href = 'admin.html';
+    else window.location.href = 'app.html';
+  }, 700);
+}
+
+// ── GOOGLE LOGIN ──
+async function googleLogin() {
+  if (!(await ensureFirebaseReady())) return;
+  hideErrs();
+  showLoader('Connecting with Google…');
+  try {
+    const result = await window._firebaseFns.signInWithPopup(window._firebaseAuth, window._googleProvider);
+    await loginSuccess(result.user);
+  } catch(e) {
+    hideLoader();
+    if (e.code !== 'auth/popup-closed-by-user') showErr('login-err', getFirebaseError(e.code));
+  }
+}
+
+// ── EMAIL LOGIN ──
+async function emailLogin() {
+  if (!(await ensureFirebaseReady())) return;
+  hideErrs();
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  if (!email || !pass) return showErr('login-err', 'Please fill all fields.');
+  showLoader('Signing you in…');
+  try {
+    const result = await window._firebaseFns.signInWithEmailAndPassword(window._firebaseAuth, email, pass);
+    await loginSuccess(result.user);
+  } catch(e) {
+    hideLoader();
+    showErr('login-err', getFirebaseError(e.code));
+  }
+}
+
+// ── EMAIL SIGNUP ──
+async function emailSignup() {
+  if (!(await ensureFirebaseReady())) return;
+  hideErrs();
+  const fname = document.getElementById('su-fname').value.trim();
+  const lname = document.getElementById('su-lname').value.trim();
+  const email = document.getElementById('su-email').value.trim();
+  const pass = document.getElementById('su-pass').value;
+  if (!fname || !email || !pass) return showErr('signup-err', 'Please fill all fields.');
+  if (pass.length < 8) return showErr('signup-err', 'Password must be at least 8 characters.');
+
+  if (selectedPlan !== 'free') {
+    initiateRazorpay(fname, lname, email, pass);
+  } else {
+    await createFirebaseAccount(fname, lname, email, pass, 'free');
+  }
+}
+
+async function createFirebaseAccount(fname, lname, email, pass, plan, paymentId = null) {
+  showLoader('Creating your account…');
+  try {
+    const result = await window._firebaseFns.createUserWithEmailAndPassword(window._firebaseAuth, email, pass);
+    await window._firebaseFns.updateProfile(result.user, { displayName: fname + ' ' + lname });
+    const db = window._firebaseDb;
+    const fns = window._firebaseFns;
+    await fns.setDoc(fns.doc(db, 'users', result.user.uid), {
+      uid: result.user.uid,
+      name: fname + ' ' + lname,
+      email: email,
+      plan: plan,
+      paymentId: paymentId,
+      isAdmin: email.toLowerCase() === getAdminEmail(),
+      status: 'active',
+      questionsToday: 0,
+      totalQuestions: 0,
+      lastQuestionDate: '',
+      joined: fns.serverTimestamp(),
+      bookmarks: []
+    });
+    await loginSuccess(result.user);
+  } catch(e) {
+    hideLoader();
+    showErr('signup-err', getFirebaseError(e.code));
+  }
+}
+
+// ── RAZORPAY ──
+function initiateRazorpay(fname, lname, email, pass) {
+  const prices = { sadhaka: 19900, guru: 49900 };
+  const labels = { sadhaka: 'Sadhaka Plan – ₹199/month', guru: 'Guru Plan – ₹499/month' };
+
+  const razorpayKey = getRazorpayKey();
+  if (!razorpayKey) {
+    showToast('Demo: Skipping payment (add Razorpay key)');
+    createFirebaseAccount(fname, lname, email, pass, selectedPlan, 'demo_' + Date.now());
+    return;
+  }
+
+  const rzp = new Razorpay({
+    key: razorpayKey,
+    amount: prices[selectedPlan],
+    currency: 'INR',
+    name: 'Deva AI',
+    description: labels[selectedPlan],
+    handler: (resp) => createFirebaseAccount(fname, lname, email, pass, selectedPlan, resp.razorpay_payment_id),
+    prefill: { name: fname + ' ' + lname, email },
+    theme: { color: '#e8720c' },
+    modal: { ondismiss: () => showErr('signup-err', 'Payment cancelled.') }
+  });
+  rzp.open();
+}
+
+// ── FORGOT PASSWORD ──
+async function forgotPassword() {
+  if (!(await ensureFirebaseReady())) return;
+  const email = document.getElementById('login-email').value.trim();
+  if (!email) return showErr('login-err', 'Enter your email above first.');
+  try {
+    await window._firebaseFns.sendPasswordResetEmail(window._firebaseAuth, email);
+    document.getElementById('login-err').style.display = 'none';
+    const s = document.createElement('div');
+    s.className = 'auth-success';
+    s.style.display = 'block';
+    s.textContent = `Password reset email sent to ${email}. Check your inbox.`;
+    document.getElementById('panel-login').insertBefore(s, document.getElementById('panel-login').firstChild);
+  } catch(e) {
+    showErr('login-err', getFirebaseError(e.code));
+  }
+}
+
+function getFirebaseError(code) {
+  const errs = {
+    'auth/user-not-found': 'No account found with this email.',
+    'auth/wrong-password': 'Incorrect password.',
+    'auth/email-already-in-use': 'An account with this email already exists.',
+    'auth/weak-password': 'Password must be at least 6 characters.',
+    'auth/invalid-email': 'Please enter a valid email address.',
+    'auth/too-many-requests': 'Too many attempts. Please try again later.',
+    'auth/network-request-failed': 'Network error. Check your internet connection.',
+    'auth/invalid-credential': 'Invalid credentials. Please check your email and password.',
+  };
+  return errs[code] || 'Something went wrong. Please try again.';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('panel-login').classList.contains('active')) emailLogin();
+    else emailSignup();
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deva AI — Divine Wisdom</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sf:#e8720c;--sfl:#f5a44a;--sfd:rgba(232,114,12,.15);
+  --gd:#c9943a;--gdl:#e8c070;--gdp:rgba(232,192,112,.1);
+  --dp:#05030a;--dk:#0c0816;--pn:#120f1e;--md:#1c1730;
+  --lt:#2a8a7a;--ltl:#4abcaa;
+  --rs:#c4556a;--rsl:#e87d94;
+  --br:rgba(232,114,12,.18);--brg:rgba(232,192,112,.2);
+  --tx:#f0e8d8;--dm:#9a8870;--mt:#3a3428;
+  --r:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{height:100%;scroll-behavior:smooth}
+body{background:var(--dp);color:var(--tx);font-family:'EB Garamond',serif;font-size:16px;line-height:1.7;height:100%;overflow:hidden}
+
+/* Sacred BG */
+.bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bg::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 50% at 50% -5%,rgba(232,114,12,.15) 0%,transparent 60%),
+  radial-gradient(ellipse 50% 40% at 90% 100%,rgba(196,85,106,.1) 0%,transparent 50%),
+  radial-gradient(ellipse 40% 40% at 5% 60%,rgba(42,138,122,.07) 0%,transparent 50%)}
+.bg::after{content:'';position:absolute;inset:0;
+  background-image:
+  radial-gradient(1px 1px at 10% 15%,rgba(255,220,180,.45) 0%,transparent 100%),
+  radial-gradient(1px 1px at 25% 40%,rgba(255,200,150,.3) 0%,transparent 100%),
+  radial-gradient(1px 1px at 42% 7%,rgba(255,220,180,.35) 0%,transparent 100%),
+  radial-gradient(1px 1px at 58% 65%,rgba(255,200,150,.2) 0%,transparent 100%),
+  radial-gradient(1px 1px at 74% 22%,rgba(255,220,180,.4) 0%,transparent 100%),
+  radial-gradient(1px 1px at 87% 50%,rgba(255,200,150,.25) 0%,transparent 100%),
+  radial-gradient(1px 1px at 15% 75%,rgba(255,220,180,.35) 0%,transparent 100%),
+  radial-gradient(2px 2px at 92% 12%,rgba(255,210,160,.35) 0%,transparent 100%),
+  radial-gradient(1px 1px at 50% 85%,rgba(255,220,180,.25) 0%,transparent 100%)}
+
+/* Layout */
+#shell{display:flex;height:100vh;position:relative;z-index:1}
+
+/* ── SIDEBAR ── */
+#sidebar{
+  width:260px;flex-shrink:0;
+  background:rgba(12,8,22,.95);
+  border-right:1px solid var(--br);
+  display:flex;flex-direction:column;
+  transition:transform .3s;
+  overflow:hidden;
+}
+.sb-logo{
+  padding:20px 18px 16px;
+  border-bottom:1px solid var(--br);
+  display:flex;align-items:center;gap:10px;
+}
+.sb-logo-icon{font-size:22px;animation:flame 2.5s ease-in-out infinite;filter:drop-shadow(0 0 6px rgba(232,114,12,.5))}
+@keyframes flame{0%,100%{filter:drop-shadow(0 0 4px rgba(232,114,12,.5))}50%{filter:drop-shadow(0 0 14px rgba(232,192,112,.8))}}
+.sb-logo-text{font-family:'Cinzel Decorative',serif;font-size:16px;font-weight:700;color:var(--gdl);letter-spacing:2px}
+.sb-logo-beta{font-family:'Cinzel',serif;font-size:7px;letter-spacing:2px;color:var(--sf);border:1px solid var(--br);padding:2px 6px;text-transform:uppercase;margin-left:4px}
+
+/* Persona selector */
+.sb-section-title{font-family:'Cinzel',serif;font-size:8px;letter-spacing:3px;color:var(--mt);text-transform:uppercase;padding:14px 18px 8px}
+.persona-list{padding:0 10px;display:flex;flex-direction:column;gap:4px}
+.persona-btn{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  background:transparent;border:1px solid transparent;
+  color:var(--dm);font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;
+  cursor:pointer;transition:all .2s;text-align:left;text-transform:uppercase;
+  border-radius:4px;
+}
+.persona-btn:hover{background:var(--sfd);border-color:var(--br);color:var(--gdl)}
+.persona-btn.active{background:rgba(232,114,12,.1);border-color:var(--sf);color:var(--sfl)}
+.persona-btn .picon{font-size:18px;width:28px;text-align:center;flex-shrink:0}
+.persona-btn .pinfo{display:flex;flex-direction:column;gap:1px}
+.persona-btn .pname{font-size:10px;letter-spacing:1.5px}
+.persona-btn .psub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:11px;color:var(--mt);font-weight:normal;letter-spacing:0;text-transform:none}
+.persona-btn.active .psub{color:var(--dm)}
+
+/* Nav items */
+.sb-nav{padding:0 10px;display:flex;flex-direction:column;gap:3px}
+.nav-btn{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  background:transparent;border:1px solid transparent;
+  color:var(--dm);font-family:'Cinzel',serif;font-size:9px;letter-spacing:1.5px;
+  cursor:pointer;transition:all .2s;text-align:left;text-transform:uppercase;
+  border-radius:4px;width:100%;
+}
+.nav-btn:hover{background:var(--gdp);border-color:var(--brg);color:var(--gdl)}
+.nav-btn.active{background:var(--gdp);border-color:var(--brg);color:var(--gdl)}
+.nav-btn .ni{font-size:16px;width:26px;text-align:center;flex-shrink:0}
+
+/* Lang selector */
+.sb-lang{padding:10px;margin:0 10px;display:flex;flex-wrap:wrap;gap:4px}
+.lang-btn{
+  flex:1;min-width:44px;padding:5px 6px;text-align:center;
+  font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;
+  background:transparent;border:1px solid var(--br);color:var(--mt);
+  cursor:pointer;transition:all .2s;text-transform:uppercase;border-radius:3px;
+}
+.lang-btn:hover{border-color:var(--sf);color:var(--sfl)}
+.lang-btn.active{background:var(--sfd);border-color:var(--sf);color:var(--sfl)}
+
+/* API key input in sidebar */
+.sb-api{padding:10px 14px;margin:0 8px 8px;background:rgba(232,114,12,.05);border:1px solid var(--br);border-radius:4px}
+.sb-api label{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--dm);text-transform:uppercase;display:block;margin-bottom:6px}
+.sb-api input{width:100%;background:var(--dk);border:1px solid var(--br);color:var(--tx);font-family:'EB Garamond',serif;font-size:13px;padding:7px 10px;outline:none;border-radius:3px;transition:border-color .2s}
+.sb-api input:focus{border-color:var(--sf)}
+.sb-api-save{width:100%;margin-top:6px;padding:7px;background:transparent;border:1px solid var(--sf);color:var(--sfl);font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:all .2s;border-radius:3px}
+.sb-api-save:hover{background:var(--sfd)}
+
+.sb-footer{margin-top:auto;padding:12px 14px;border-top:1px solid var(--br);font-family:'Cinzel',serif;font-size:7px;letter-spacing:2px;color:var(--mt);text-transform:uppercase;text-align:center}
+.sb-footer span{color:var(--sfl)}
+
+/* ── MAIN AREA ── */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+
+/* Pages */
+.page{display:none;flex:1;flex-direction:column;overflow:hidden}
+.page.active{display:flex}
+
+/* ── TOP BAR ── */
+.topbar{
+  padding:0 20px;height:56px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(5,3,10,.7);border-bottom:1px solid var(--br);
+  backdrop-filter:blur(12px);gap:12px;
+}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.hamburger{display:none;background:none;border:none;color:var(--dm);cursor:pointer;font-size:18px;padding:4px}
+.topbar-title{font-family:'Cinzel',serif;font-size:11px;letter-spacing:3px;color:var(--gdl);text-transform:uppercase}
+.topbar-persona{display:flex;align-items:center;gap:6px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:var(--dm)}
+.topbar-persona strong{color:var(--sfl);font-style:normal}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.tb-btn{background:none;border:1px solid var(--br);color:var(--dm);font-family:'Cinzel',serif;font-size:8px;letter-spacing:1.5px;padding:6px 12px;cursor:pointer;text-transform:uppercase;transition:all .2s;border-radius:3px;white-space:nowrap}
+.tb-btn:hover{border-color:var(--gdl);color:var(--gdl)}
+
+/* ── CHAT PAGE ── */
+#pg-chat{flex-direction:column}
+
+.chat-messages{
+  flex:1;overflow-y:auto;padding:24px 20px;
+  display:flex;flex-direction:column;gap:20px;
+  scrollbar-width:thin;scrollbar-color:var(--br) transparent;
+}
+.chat-messages::-webkit-scrollbar{width:3px}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--br);border-radius:2px}
+
+/* Welcome screen */
+.chat-welcome{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;padding:40px 24px;gap:24px;
+}
+.wl-om{font-size:48px;animation:flame 3s ease-in-out infinite}
+.wl-title{font-family:'Cinzel Decorative',serif;font-size:clamp(22px,4vw,36px);color:var(--gdl);letter-spacing:2px}
+.wl-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:var(--dm);max-width:400px;line-height:1.7}
+.wl-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:560px}
+.wl-chip{
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;
+  border:1px solid var(--br);color:var(--dm);padding:8px 14px;
+  cursor:pointer;transition:all .2s;text-transform:uppercase;border-radius:3px;
+  background:rgba(232,114,12,.04);
+}
+.wl-chip:hover{border-color:var(--sf);color:var(--sfl);background:var(--sfd)}
+.wl-verse{
+  background:rgba(232,192,112,.05);border:1px solid var(--brg);border-left:3px solid var(--gd);
+  padding:16px 20px;max-width:500px;text-align:left;border-radius:0 4px 4px 0;
+}
+.wl-verse-ref{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--gd);text-transform:uppercase;margin-bottom:6px}
+.wl-verse-text{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:var(--gdl);line-height:1.6}
+
+/* Messages */
+.msg-wrap{display:flex;gap:12px;align-items:flex-start;animation:msgIn .35s ease forwards;opacity:0}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg-wrap.user{flex-direction:row-reverse}
+
+.msg-av{
+  width:34px;height:34px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+}
+.msg-av.ai{background:linear-gradient(135deg,rgba(232,114,12,.3),rgba(232,192,112,.2));border:1px solid var(--br)}
+.msg-av.user{background:rgba(196,85,106,.2);border:1px solid rgba(196,85,106,.3)}
+
+.msg-content{max-width:72%;display:flex;flex-direction:column;gap:5px}
+.msg-wrap.user .msg-content{align-items:flex-end}
+.msg-name-row{font-family:'Cinzel',serif;font-size:8px;letter-spacing:1.5px;color:var(--mt);text-transform:uppercase}
+
+.msg-bubble{
+  padding:14px 18px;font-size:15px;line-height:1.8;
+  font-family:'EB Garamond',serif;border-radius:4px;
+}
+.msg-bubble.ai{
+  background:rgba(232,114,12,.06);border:1px solid rgba(232,114,12,.12);
+  border-radius:0 12px 12px 12px;color:var(--tx);
+}
+.msg-bubble.user{
+  background:rgba(196,85,106,.08);border:1px solid rgba(196,85,106,.15);
+  border-radius:12px 12px 0 12px;color:var(--tx);
+}
+.msg-bubble strong{color:var(--gdl)}
+.msg-bubble em{color:var(--sfl)}
+
+/* Verse block inside message */
+.verse-block{
+  margin-top:12px;background:rgba(232,192,112,.05);
+  border:1px solid rgba(232,192,112,.15);border-left:3px solid var(--gd);
+  padding:14px 16px;border-radius:0 4px 4px 0;
+}
+.vb-ref{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--gd);text-transform:uppercase;margin-bottom:5px}
+.vb-sanskrit{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:var(--gdl);line-height:1.6;margin-bottom:6px}
+.vb-meaning{font-size:13px;color:var(--dm);font-family:'EB Garamond',serif;line-height:1.6}
+
+/* Message actions */
+.msg-actions{display:flex;gap:6px;margin-top:4px;opacity:0;transition:opacity .2s}
+.msg-wrap:hover .msg-actions{opacity:1}
+.msg-act-btn{background:none;border:1px solid var(--br);color:var(--mt);font-size:10px;padding:3px 8px;cursor:pointer;font-family:'Cinzel',serif;letter-spacing:1px;transition:all .2s;border-radius:2px}
+.msg-act-btn:hover{border-color:var(--gd);color:var(--gdl)}
+
+/* Typing indicator */
+.typing-ind{display:flex;gap:4px;padding:14px 18px;align-items:center}
+.typing-dot{width:6px;height:6px;border-radius:50%;background:var(--sf);animation:typingDot 1.2s ease-in-out infinite}
+.typing-dot:nth-child(2){animation-delay:.2s}
+.typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes typingDot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+
+/* Chat input */
+.chat-input-wrap{
+  padding:14px 20px;border-top:1px solid var(--br);
+  background:rgba(5,3,10,.6);backdrop-filter:blur(10px);flex-shrink:0;
+}
+.chat-input-row{display:flex;gap:8px;align-items:flex-end}
+.chat-input{
+  flex:1;background:rgba(232,114,12,.04);border:1px solid var(--br);
+  color:var(--tx);font-family:'EB Garamond',serif;font-size:15px;
+  padding:11px 16px;outline:none;transition:border-color .2s;
+  resize:none;min-height:44px;max-height:120px;border-radius:4px;
+  scrollbar-width:thin;
+}
+.chat-input:focus{border-color:var(--sf)}
+.chat-input::placeholder{color:var(--mt)}
+.send-btn{
+  width:44px;height:44px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--sf),var(--gd));
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:17px;transition:all .2s;border-radius:4px;
+}
+.send-btn:hover{box-shadow:0 0 18px rgba(232,114,12,.5);transform:scale(1.05)}
+.send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.voice-btn{
+  width:44px;height:44px;flex-shrink:0;
+  background:transparent;border:1px solid var(--br);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:17px;color:var(--dm);transition:all .2s;border-radius:4px;
+}
+.voice-btn:hover{border-color:var(--sfl);color:var(--sfl)}
+.voice-btn.listening{border-color:var(--rs);color:var(--rsl);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(196,85,106,.4)}50%{box-shadow:0 0 0 6px rgba(196,85,106,0)}}
+
+.chat-input-info{display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding:0 2px}
+.chat-hint{font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:var(--mt);text-transform:uppercase}
+.char-count{font-family:'Cinzel',serif;font-size:8px;color:var(--mt)}
+
+/* ── SCRIPTURE PAGE ── */
+#pg-scripture{flex-direction:column}
+.scripture-layout{flex:1;display:grid;grid-template-columns:220px 1fr;overflow:hidden}
+@media(max-width:700px){.scripture-layout{grid-template-columns:1fr}}
+
+.sc-sidebar{border-right:1px solid var(--br);display:flex;flex-direction:column;overflow:hidden}
+.sc-search{padding:12px;border-bottom:1px solid var(--br)}
+.sc-search input{width:100%;background:rgba(232,114,12,.04);border:1px solid var(--br);color:var(--tx);font-family:'EB Garamond',serif;font-size:14px;padding:8px 12px;outline:none;transition:border-color .2s;border-radius:3px}
+.sc-search input:focus{border-color:var(--sf)}
+.sc-tabs{display:flex;flex-wrap:wrap;gap:4px;padding:10px;border-bottom:1px solid var(--br)}
+.sc-tab{font-family:'Cinzel',serif;font-size:7px;letter-spacing:1.5px;border:1px solid var(--br);color:var(--mt);padding:4px 8px;cursor:pointer;transition:all .2s;text-transform:uppercase;border-radius:2px}
+.sc-tab:hover,.sc-tab.on{border-color:var(--gd);color:var(--gdl);background:var(--gdp)}
+
+.verse-list-sc{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--br) transparent}
+.verse-list-sc::-webkit-scrollbar{width:2px}
+.verse-list-sc::-webkit-scrollbar-thumb{background:var(--br)}
+.vi{padding:12px 14px;border-bottom:1px solid rgba(232,114,12,.06);cursor:pointer;transition:all .2s}
+.vi:hover,.vi.sel{background:rgba(232,114,12,.06)}
+.vi.sel{border-left:2px solid var(--sf)}
+.vi-ref{font-family:'Cinzel',serif;font-size:8px;letter-spacing:1.5px;color:var(--gd);text-transform:uppercase;margin-bottom:2px}
+.vi-prev{font-size:12px;color:var(--mt);font-family:'Cormorant Garamond',serif;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.sc-detail{padding:28px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--br) transparent}
+.sc-detail::-webkit-scrollbar{width:3px}
+.sc-detail::-webkit-scrollbar-thumb{background:var(--br)}
+.sd-ref{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2.5px;color:var(--sfl);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.sd-actions{display:flex;gap:6px}
+.sd-btn{background:none;border:1px solid var(--br);color:var(--dm);font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;padding:4px 10px;cursor:pointer;transition:all .2s;border-radius:2px;text-transform:uppercase}
+.sd-btn:hover{border-color:var(--gd);color:var(--gdl)}
+.sd-btn.saved{border-color:var(--sf);color:var(--sfl)}
+.sd-sanskrit{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gdl);line-height:1.7;margin-bottom:16px;font-style:italic;border-bottom:1px solid var(--br);padding-bottom:16px}
+.sd-trans{font-size:16px;color:var(--tx);margin-bottom:14px;line-height:1.8}
+.sd-exp{font-size:14px;color:var(--dm);line-height:1.85;margin-bottom:20px}
+.sd-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+.sd-tag{font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;border:1px solid var(--brg);color:var(--dm);padding:3px 10px;text-transform:uppercase;border-radius:2px}
+.sd-ask-btn{padding:10px 20px;background:transparent;border:1px solid var(--sf);color:var(--sfl);font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all .2s;border-radius:3px;text-transform:uppercase}
+.sd-ask-btn:hover{background:var(--sfd)}
+
+/* ── DAILY WISDOM PAGE ── */
+#pg-daily{overflow-y:auto;align-items:center;padding:40px 20px;scrollbar-width:thin;scrollbar-color:var(--br) transparent}
+.daily-wrap{max-width:700px;width:100%;display:flex;flex-direction:column;gap:24px}
+
+.daily-hero{
+  background:var(--pn);border:1px solid var(--brg);
+  padding:48px 40px;text-align:center;position:relative;overflow:hidden;
+}
+.daily-hero::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:400px;height:300px;background:radial-gradient(ellipse,rgba(232,192,112,.1) 0%,transparent 70%);pointer-events:none}
+.dh-date{font-family:'Cinzel',serif;font-size:8px;letter-spacing:3px;color:var(--dm);text-transform:uppercase;margin-bottom:20px}
+.dh-badge{font-family:'Cinzel',serif;font-size:8px;letter-spacing:3px;color:var(--sfl);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px}
+.dh-badge::before,.dh-badge::after{content:'✦';font-size:7px;color:var(--gd)}
+.dh-verse{font-family:'Cinzel Decorative',serif;font-size:clamp(17px,2.5vw,24px);color:var(--gdl);line-height:1.6;margin-bottom:14px}
+.dh-meaning{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:var(--dm);line-height:1.7;margin-bottom:16px}
+.dh-src{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--sfl);text-transform:uppercase}
+
+.daily-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--br)}
+@media(max-width:500px){.daily-grid{grid-template-columns:1fr}}
+.dg-card{background:var(--pn);padding:22px 18px;transition:all .2s;cursor:pointer}
+.dg-card:hover{background:rgba(232,114,12,.05)}
+.dg-icon{font-size:26px;margin-bottom:10px;display:block}
+.dg-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--gd);text-transform:uppercase;margin-bottom:6px}
+.dg-text{font-size:14px;color:var(--dm);line-height:1.7}
+.dg-src{font-family:'Cinzel',serif;font-size:8px;color:var(--mt);margin-top:8px;letter-spacing:1px;text-transform:uppercase}
+
+/* ── LEARN PAGE ── */
+#pg-learn{overflow-y:auto;padding:28px 20px;scrollbar-width:thin;scrollbar-color:var(--br) transparent}
+.learn-wrap{max-width:900px;margin:0 auto}
+.page-header{margin-bottom:28px}
+.page-header h2{font-family:'Cinzel Decorative',serif;font-size:clamp(20px,3vw,32px);color:var(--gdl);margin-bottom:6px}
+.page-header p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:var(--dm)}
+
+.topic-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--br);margin-bottom:24px}
+@media(max-width:700px){.topic-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:420px){.topic-grid{grid-template-columns:1fr}}
+.topic-card{
+  background:var(--pn);padding:24px 20px;cursor:pointer;transition:all .2s;
+  border:1px solid transparent;position:relative;overflow:hidden;
+}
+.topic-card:hover{background:rgba(232,114,12,.05);border-color:var(--br)}
+.topic-card.active-topic{border-color:var(--sf);background:var(--sfd)}
+.tc-icon{font-size:32px;margin-bottom:12px;display:block}
+.tc-name{font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--gdl);text-transform:uppercase;margin-bottom:6px}
+.tc-desc{font-size:13px;color:var(--dm);line-height:1.6}
+.tc-count{font-family:'Cinzel',serif;font-size:8px;color:var(--mt);margin-top:8px;letter-spacing:1px;text-transform:uppercase}
+.tc-progress{margin-top:8px;height:2px;background:var(--br);border-radius:1px;overflow:hidden}
+.tc-bar{height:100%;background:linear-gradient(90deg,var(--sf),var(--gd));border-radius:1px;transition:width .5s ease}
+
+.topic-detail{background:var(--pn);border:1px solid var(--br);padding:28px;display:none}
+.topic-detail.show{display:block}
+
+/* ── BOOKMARKS PAGE ── */
+#pg-bookmarks{overflow-y:auto;padding:28px 20px;scrollbar-width:thin;scrollbar-color:var(--br) transparent}
+.bookmarks-wrap{max-width:800px;margin:0 auto}
+.bookmark-list{display:flex;flex-direction:column;gap:2px;background:var(--br)}
+.bm-item{background:var(--pn);padding:18px 20px;display:flex;gap:14px;align-items:flex-start}
+.bm-type{font-family:'Cinzel',serif;font-size:8px;letter-spacing:1.5px;border:1px solid var(--br);color:var(--dm);padding:3px 8px;text-transform:uppercase;flex-shrink:0;margin-top:2px;border-radius:2px}
+.bm-body{flex:1}
+.bm-ref{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1.5px;color:var(--gd);text-transform:uppercase;margin-bottom:4px}
+.bm-text{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--gdl);line-height:1.6;margin-bottom:6px}
+.bm-sub{font-size:13px;color:var(--dm)}
+.bm-del{background:none;border:none;color:var(--mt);cursor:pointer;font-size:14px;padding:4px;transition:color .2s;flex-shrink:0}
+.bm-del:hover{color:var(--rs)}
+.bm-empty{text-align:center;padding:60px 20px;color:var(--mt);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:200;
+  background:rgba(12,8,22,.95);border:1px solid var(--gd);
+  padding:12px 18px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:1.5px;
+  color:var(--gdl);text-transform:uppercase;
+  transform:translateY(80px);transition:transform .3s ease;
+  pointer-events:none;border-radius:3px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+}
+.toast.show{transform:translateY(0)}
+
+/* Mobile sidebar overlay */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40}
+
+/* Responsive */
+@media(max-width:768px){
+  #sidebar{position:fixed;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%)}
+  #sidebar.open{transform:translateX(0)}
+  .sb-overlay.show{display:block}
+  .hamburger{display:flex}
+  .scripture-layout{grid-template-columns:1fr}
+  .sc-sidebar{display:none}
+}
+
+/* Divider */
+.div-line{height:1px;background:linear-gradient(90deg,transparent,var(--br),transparent);margin:8px 0}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--br);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div id="shell">
+
+<!-- ══ SIDEBAR ══ -->
+<div id="sidebar">
+  <div class="sb-logo">
+    <span class="sb-logo-icon">🪔</span>
+    <span class="sb-logo-text">DEVA AI</span>
+    <span class="sb-logo-beta">BETA</span>
+  </div>
+
+  <div class="sb-section-title">Divine Persona</div>
+  <div class="persona-list">
+    <button class="persona-btn active" onclick="setPersona('krishna',this)">
+      <span class="picon">🦚</span>
+      <span class="pinfo"><span class="pname">Krishna Mode</span><span class="psub">Strategy & Dharma</span></span>
+    </button>
+    <button class="persona-btn" onclick="setPersona('shiva',this)">
+      <span class="picon">🔱</span>
+      <span class="pinfo"><span class="pname">Shiva Mode</span><span class="psub">Detachment & Meditation</span></span>
+    </button>
+    <button class="persona-btn" onclick="setPersona('saraswati',this)">
+      <span class="picon">🪷</span>
+      <span class="pinfo"><span class="pname">Saraswati Mode</span><span class="psub">Knowledge & Learning</span></span>
+    </button>
+    <button class="persona-btn" onclick="setPersona('hanuman',this)">
+      <span class="picon">🌅</span>
+      <span class="pinfo"><span class="pname">Hanuman Mode</span><span class="psub">Devotion & Discipline</span></span>
+    </button>
+  </div>
+
+  <div class="div-line" style="margin:12px 14px"></div>
+
+  <div class="sb-section-title">Navigate</div>
+  <div class="sb-nav">
+    <button class="nav-btn active" onclick="showPage('chat',this)"><span class="ni">💬</span>Divine Chat</button>
+    <button class="nav-btn" onclick="showPage('scripture',this)"><span class="ni">📜</span>Scriptures</button>
+    <button class="nav-btn" onclick="showPage('daily',this)"><span class="ni">☀️</span>Daily Wisdom</button>
+    <button class="nav-btn" onclick="showPage('learn',this)"><span class="ni">🎓</span>Learn</button>
+    <button class="nav-btn" onclick="showPage('bookmarks',this)"><span class="ni">⭐</span>Bookmarks</button>
+  </div>
+
+  <div class="div-line" style="margin:12px 14px"></div>
+
+  <div class="sb-section-title">Language</div>
+  <div class="sb-lang">
+    <button class="lang-btn active" onclick="setLang('en',this)">EN</button>
+    <button class="lang-btn" onclick="setLang('kn',this)">ಕನ್ನಡ</button>
+    <button class="lang-btn" onclick="setLang('hi',this)">हिन्दी</button>
+    <button class="lang-btn" onclick="setLang('sa',this)">संस्कृत</button>
+    <button class="lang-btn" onclick="setLang('ta',this)">தமிழ்</button>
+  </div>
+
+  <div class="div-line" style="margin:12px 14px"></div>
+
+  <div class="sb-api">
+    <label>Anthropic API Key</label>
+    <input type="password" id="api-input" placeholder="sk-ant-api03-..." autocomplete="off">
+    <button class="sb-api-save" onclick="saveApiKey()">✦ Save Key</button>
+  </div>
+
+  <div class="sb-footer">Built by <span>Sushvin AI Labs</span></div>
+</div>
+
+<!-- Overlay for mobile -->
+<div class="sb-overlay" id="sb-overlay" onclick="closeSidebar()"></div>
+
+<!-- ══ MAIN ══ -->
+<div id="main">
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title" id="tb-title">Divine Chat</div>
+      <div class="topbar-persona" id="tb-persona"><strong>🦚 Krishna Mode</strong>&nbsp;· Karma & Dharma</div>
+    </div>
+    <div class="topbar-right">
+      <button class="tb-btn" onclick="clearChat()" id="clear-btn">Clear Chat</button>
+      <button class="tb-btn" onclick="downloadPDF()">⬇ PDF</button>
+      <button class="tb-btn" onclick="showShareModal()">↑ Share</button>
+      <button class="tb-btn" onclick="showPage('bookmarks',null)">⭐ Saved</button>
+    </div>
+  </div>
+
+  <!-- ── CHAT PAGE ── -->
+  <div class="page active" id="pg-chat">
+    <div class="chat-messages" id="chat-msgs">
+      <div class="chat-welcome" id="chat-welcome">
+        <div class="wl-om">🪔</div>
+        <div class="wl-title">Namaste 🙏</div>
+        <div class="wl-sub">Ask me about dharma, karma, life guidance, or explore the wisdom of our sacred scriptures.</div>
+        <div class="wl-verse">
+          <div class="wl-verse-ref">📖 Bhagavad Gita · 2.47</div>
+          <div class="wl-verse-text">"Karmaṇy evādhikāras te mā phaleṣu kadācana" — Your right is to perform your duty, never to the fruits thereof.</div>
+        </div>
+        <div class="wl-chips" id="wl-chips"></div>
+      </div>
+    </div>
+
+    <div class="chat-input-wrap">
+      <div class="chat-input-row">
+        <button class="voice-btn" id="voice-btn" onclick="toggleVoice()" title="Voice Input">🎙️</button>
+        <textarea class="chat-input" id="chat-in" placeholder="Ask about dharma, karma, life guidance, scriptures…" rows="1" maxlength="1000"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()">➤</button>
+      </div>
+      <div class="chat-input-info">
+        <span class="chat-hint">Press Enter to send · Shift+Enter for new line</span>
+        <span class="char-count" id="char-count">0/1000</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCRIPTURE PAGE ── -->
+  <div class="page" id="pg-scripture">
+    <div class="topbar" style="position:relative;height:auto;padding:10px 14px;flex-shrink:0">
+      <div class="sc-search" style="padding:0;flex:1;max-width:300px">
+        <input type="text" placeholder="🔍 Search verses, topics, keywords…" id="sc-search-in" oninput="filterVerses(this.value)">
+      </div>
+      <div class="sc-tabs" style="padding:0;border:none">
+        <div class="sc-tab on" onclick="setScripture('gita',this)">Bhagavad Gita</div>
+        <div class="sc-tab" onclick="setScripture('upanishads',this)">Upanishads</div>
+        <div class="sc-tab" onclick="setScripture('ramayana',this)">Ramayana</div>
+        <div class="sc-tab" onclick="setScripture('vedas',this)">Vedas</div>
+      </div>
+    </div>
+    <div class="scripture-layout">
+      <div class="sc-sidebar">
+        <div class="verse-list-sc" id="verse-list-sc"></div>
+      </div>
+      <div class="sc-detail" id="sc-detail">
+        <div style="text-align:center;padding:60px 20px;color:var(--mt);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px">
+          Select a verse from the list to begin 🙏
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DAILY WISDOM PAGE ── -->
+  <div class="page" id="pg-daily">
+    <div class="daily-wrap" id="daily-wrap"></div>
+  </div>
+
+  <!-- ── LEARN PAGE ── -->
+  <div class="page" id="pg-learn">
+    <div class="learn-wrap">
+      <div class="page-header">
+        <h2>🎓 Learning Paths</h2>
+        <p>Structured modules to deepen your understanding of dharmic wisdom</p>
+      </div>
+      <div class="topic-grid" id="topic-grid"></div>
+      <div class="topic-detail" id="topic-detail"></div>
+    </div>
+  </div>
+
+  <!-- ── BOOKMARKS PAGE ── -->
+  <div class="page" id="pg-bookmarks">
+    <div class="bookmarks-wrap">
+      <div class="page-header">
+        <h2>⭐ Saved Wisdom</h2>
+        <p>Your bookmarked verses and saved answers</p>
+      </div>
+      <div id="bookmarks-list"></div>
+    </div>
+  </div>
+
+</div><!-- #main -->
+</div><!-- #shell -->
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Share Modal -->
+<div class="modal-bg" id="share-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--pn);border:1px solid var(--br);padding:28px 26px;max-width:380px;width:100%;position:relative;border-radius:2px">
+    <button onclick="closeShareModal()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--dm);cursor:pointer;font-size:18px">✕</button>
+    <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:3px;color:var(--gdl);text-transform:uppercase;margin-bottom:20px">Share Deva AI</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="shareWhatsApp()" style="padding:12px 16px;background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.3);color:#25d366;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;border-radius:2px">📱 Share on WhatsApp</button>
+      <button onclick="shareTelegram()" style="padding:12px 16px;background:rgba(0,136,204,.08);border:1px solid rgba(0,136,204,.3);color:#0088cc;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;border-radius:2px">✈️ Share on Telegram</button>
+      <button onclick="copyAppLink()" style="padding:12px 16px;background:var(--gdp);border:1px solid var(--brg);color:var(--gdl);font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;border-radius:2px">🔗 Copy App Link</button>
+      <button onclick="downloadPDF()" style="padding:12px 16px;background:var(--sfd);border:1px solid var(--br);color:var(--sfl);font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;border-radius:2px">⬇️ Export Chat as PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let apiKey = localStorage.getItem('deva_api') || '';
+let currentPersona = 'krishna';
+let currentLang = 'en';
+let currentPage = 'chat';
+let chatHistory = [];
+let bookmarks = JSON.parse(localStorage.getItem('deva_bookmarks') || '[]');
+let isGenerating = false;
+let speechSynth = window.speechSynthesis;
+let recognition = null;
+let isListening = false;
+
+// Persona config
+const PERSONAS = {
+  krishna: {
+    icon:'🦚', name:'Krishna Mode', sub:'Karma & Dharma',
+    system:`You are Deva AI in Krishna Mode — channeling the wisdom of Lord Krishna from the Bhagavad Gita. Speak with divine clarity, strategic insight, and compassion. Ground every answer in dharmic principles and karma yoga. Reference verses from the Bhagavad Gita naturally. When sharing a verse, wrap it in [VERSE]ref||sanskrit||translation[/VERSE] format. Be warm, wise, and inspiring. Avoid modern jargon. Speak as a divine guide, not a chatbot.`,
+  },
+  shiva: {
+    icon:'🔱', name:'Shiva Mode', sub:'Detachment & Meditation',
+    system:`You are Deva AI in Shiva Mode — embodying the stillness and transcendence of Lord Shiva. Speak with serene detachment, pointing always toward the silence within. Guide on meditation, pratyahara, liberation from ego, and the dissolution of suffering. Reference the Upanishads, Shiva Sutras, and Vedantic philosophy. When sharing a verse, wrap it in [VERSE]ref||sanskrit||translation[/VERSE] format.`,
+  },
+  saraswati: {
+    icon:'🪷', name:'Saraswati Mode', sub:'Knowledge & Truth',
+    system:`You are Deva AI in Saraswati Mode — embodying the pure knowledge of Goddess Saraswati. Speak with scholarly depth, intellectual clarity, and luminous insight. Draw from the Vedas, Upanishads, and Vedanta philosophy. Illuminate the seeker's intellect with precise, beautiful explanations. When sharing a verse, wrap it in [VERSE]ref||sanskrit||translation[/VERSE] format.`,
+  },
+  hanuman: {
+    icon:'🌅', name:'Hanuman Mode', sub:'Devotion & Discipline',
+    system:`You are Deva AI in Hanuman Mode — embodying the devotion, strength, and discipline of Hanuman. Speak with energetic devotion and practical discipline. Guide on brahmacharya, self-discipline, seva, and fearlessness. Reference the Ramayana and Hanuman Chalisa. When sharing a verse, wrap it in [VERSE]ref||sanskrit||translation[/VERSE] format. Inspire action and dedication.`,
+  }
+};
+
+// Language config
+const LANGS = {
+  en:'English', kn:'Kannada', hi:'Hindi', sa:'Sanskrit', ta:'Tamil'
+};
+
+// Suggestion chips per persona
+const SUGGESTIONS = {
+  krishna:['What is my dharma?','How to act without attachment?','Explain karma yoga','How to overcome fear?','What is the self (Atman)?','Purpose of human life'],
+  shiva:['How to meditate deeply?','What is detachment?','How to silence the mind?','Explain moksha','What is maya?','Path to liberation'],
+  saraswati:['Explain the Upanishads','What is Brahman?','Difference between Atman and Brahman?','What is Advaita Vedanta?','How to gain true knowledge?','Explain Neti Neti'],
+  hanuman:['How to build discipline?','What is brahmacharya?','How to be fearless?','Power of devotion','How to serve selflessly?','Overcome laziness']
+};
+
+// Scripture data
+const SCRIPTURES = {
+  gita: [
+    {ref:'BG 2.47',san:'Karmaṇy evādhikāras te mā phaleṣu kadācana.\nMā karma-phala-hetur bhūr mā te saṅgo\'stv akarmaṇi.',trans:'You have a right to perform your prescribed duties, but you are not entitled to the fruits of your actions. Never consider yourself the cause of the results, and never be attached to inaction.',exp:'This verse is the cornerstone of Karma Yoga — the yoga of selfless action. Krishna teaches Arjuna that liberation comes from performing one\'s duty without ego-driven attachment to outcomes. The doer acts, but does not grasp at results. This destroys the very root of suffering, which arises from identifying with outcomes rather than the pure act of doing.',tags:['Karma','Dharma','Detachment','Action']},
+    {ref:'BG 2.20',san:'Na jāyate mriyate vā kadācin\nnāyaṁ bhūtvā bhavitā vā na bhūyaḥ\najo nityaḥ śāśvato\'yaṁ purāṇo\nna hanyate hanyamāne śarīre',trans:'The soul is never born nor dies at any time. It has not come into being, does not come into being, and will not come into being. It is unborn, eternal, ever-existing, and primeval. It is not slain when the body is slain.',exp:'Krishna reveals the eternal nature of the Atman — the true self. Understanding this liberates us from the deepest fear: death. When we know our true self is beyond birth and death, we can act in the world without the paralysing fear of loss.',tags:['Atman','Soul','Immortality','Self']},
+    {ref:'BG 4.7',san:'Yadā yadā hi dharmasya glānir bhavati bhārata\nabhyutthānam adharmasya tadātmānaṁ sṛijāmy aham',trans:'Whenever and wherever there is a decline in righteousness, O descendant of Bharata, and a predominant rise of irreligion — at that time I manifest Myself.',exp:'This verse reveals Krishna\'s cosmic promise — the divine maintains universal order. It speaks of cyclical manifestation to restore dharma when adharma spreads. This teaches us that no age of darkness is permanent, and the divine force of righteousness is ever-present.',tags:['Dharma','Avatar','Divine Order','Krishna']},
+    {ref:'BG 6.5',san:'Uddhared ātmanātmānaṁ nātmānam avasādayet\nātmaiva hy ātmano bandhur ātmaiva ripur ātmanaḥ',trans:'One must deliver himself with the help of his mind, and not degrade himself. The mind is the friend of the conditioned soul, and his enemy as well.',exp:'Krishna teaches that the mind is simultaneously our greatest ally and our greatest obstacle. When disciplined, it liberates; when untamed, it enslaves. This verse is the foundation of self-mastery — the recognition that transformation comes from within.',tags:['Mind','Self-mastery','Discipline','Yoga']},
+    {ref:'BG 9.22',san:'Ananyāś cintayanto māṁ ye janāḥ paryupāsate\nteṣāṁ nityābhiyuktānāṁ yoga-kṣemaṁ vahāmy aham',trans:'But those who always worship Me with devotion, meditating on My transcendental form — I carry what they lack and preserve what they have.',exp:'A verse of supreme comfort — Krishna\'s personal promise to the devoted seeker. Those who surrender fully and think only of the divine find their needs mysteriously met. This is the relationship between the devotee and the Divine: complete trust, complete provision.',tags:['Bhakti','Devotion','Grace','Trust']},
+    {ref:'BG 18.66',san:'Sarva-dharmān parityajya mām ekaṁ śaraṇaṁ vraja\nahaṁ tvāṁ sarva-pāpebhyo mokṣayiṣyāmi mā śucaḥ',trans:'Abandon all varieties of dharma and simply surrender unto Me alone. I shall liberate you from all sinful reactions; do not fear.',exp:'The final and most radical teaching of the Gita — the pinnacle of surrender. Having taught karma yoga, jnana yoga, and bhakti yoga, Krishna ultimately reveals that the highest path is total surrender to the Divine. All complexity dissolves into this single, beautiful act of letting go.',tags:['Surrender','Moksha','Bhakti','Liberation']},
+  ],
+  upanishads: [
+    {ref:'Chandogya 6.8.7',san:'Tat tvam asi',trans:'That thou art — the ultimate reality (Brahman) is identical with your innermost self (Atman).',exp:'One of the four Mahavakyas — the Great Sayings of Vedanta. This two-word teaching dissolves the illusion of separation between the individual and the universal. Your deepest self is not separate from the ground of all existence. This is the direct path to liberation.',tags:['Advaita','Brahman','Atman','Mahavakya']},
+    {ref:'Brihadaranyaka 1.4.10',san:'Aham brahmāsmi',trans:'I am Brahman — the absolute reality, the infinite, the ground of all being.',exp:'Another of the four Mahavakyas, this is the recognition of one\'s own infinite nature. Not as an ego-statement but as the dissolution of ego into the All. When truly understood, fear, desire, and suffering cannot persist.',tags:['Brahman','Self-realization','Liberation','Non-duality']},
+    {ref:'Mundaka 3.1.3',san:'Yadā paśyaḥ paśyate rukma-varṇaṁ\nkartāram īśaṁ puruṣaṁ brahma-yonim',trans:'When the seer sees the golden-colored creator, the Lord, the person, the source of Brahman — then the wise one shakes off good and evil and attains the supreme equality.',exp:'This describes the direct spiritual experience — the moment of enlightenment when the seeker perceives the divine reality directly. It is not a belief but a seeing, a direct recognition that liberates from all duality.',tags:['Enlightenment','Vision','Liberation','Brahman']},
+  ],
+  ramayana: [
+    {ref:'Valmiki Ramayana',san:'Dharmo rakṣati rakṣitaḥ',trans:'Dharma protects those who protect Dharma.',exp:'This immortal saying from the Mahabharata (also reflected throughout the Ramayana) encapsulates the reciprocal relationship between the individual and cosmic order. When a person upholds righteousness in every action, the universe itself provides protection and support.',tags:['Dharma','Protection','Righteousness','Karma']},
+    {ref:'Sundara Kanda 5.1',san:'Jagat sarvaṁ śarīraṁ te sthitaṁ yasya carācare',trans:'The entire universe, moving and unmoving, exists within your body, O Lord.',exp:'Hanuman\'s realization of Rama\'s divine omnipresence. This verse reveals the non-dual nature of reality — the divine pervades all of existence. This understanding transforms how we relate to every living being and every moment.',tags:['Devotion','Omnipresence','Divine','Hanuman']},
+  ],
+  vedas: [
+    {ref:'Rigveda 1.89.1',san:'Ā no bhadrāḥ kratavo yantu viśvato',trans:'Let noble thoughts come to us from every direction.',exp:'This ancient prayer from the oldest scripture on earth reveals the open, inquiring spirit of Vedic civilization. Wisdom is not the property of any one tradition — it flows from all directions to the open and humble heart.',tags:['Wisdom','Openness','Prayer','Vedas']},
+    {ref:'Yajurveda 36.17',san:'Oṃ dyauḥ śāntirantarikṣaṃ śāntiḥ',trans:'Om. May peace radiate in the sky, in the atmosphere, in the earth, in the waters, in plants, in trees, in all divine beings, in Brahman and in all of existence.',exp:'The Shanti Mantra — the great peace invocation of the Vedas. Peace is understood as cosmic, not merely personal. When inner peace is established, it radiates outward to harmonize all of existence. This is the Vedic vision of wholeness.',tags:['Peace','Shanti','Prayer','Cosmic harmony']},
+  ]
+};
+
+// Topic learning data
+const TOPICS = [
+  {id:'karma', icon:'⚖️', name:'Karma', desc:'The law of cause and effect — understanding how actions shape destiny', count:'12 lessons', progress:0, content:`<h3 style="font-family:'Cinzel',serif;color:var(--gdl);font-size:14px;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px">Understanding Karma</h3><p style="font-size:15px;color:var(--tx);line-height:1.85;margin-bottom:14px">Karma is one of the most misunderstood concepts in dharmic thought. It is not punishment or reward — it is simply the law of action and its inevitable consequence. Every thought, word, and deed creates an impression (samskara) that shapes future experience.</p><p style="font-size:15px;color:var(--tx);line-height:1.85;margin-bottom:14px">The Bhagavad Gita distinguishes between <strong style="color:var(--gdl)">Sakama Karma</strong> (action with desire for results) and <strong style="color:var(--gdl)">Nishkama Karma</strong> (action without attachment). The latter is the key to liberation.</p><div style="background:var(--gdp);border:1px solid var(--brg);border-left:3px solid var(--gd);padding:14px 16px;margin-top:16px;border-radius:0 4px 4px 0"><div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--gd);text-transform:uppercase;margin-bottom:6px">Key Verse</div><div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:var(--gdl)">"Karmaṇy evādhikāras te mā phaleṣu kadācana" — BG 2.47</div></div>`},
+  {id:'dharma', icon:'🔱', name:'Dharma', desc:'Your sacred duty — the cosmic order that sustains all existence', count:'15 lessons', progress:0, content:`<h3 style="font-family:'Cinzel',serif;color:var(--gdl);font-size:14px;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px">The Nature of Dharma</h3><p style="font-size:15px;color:var(--tx);line-height:1.85;margin-bottom:14px">Dharma is the cosmic order that sustains all existence — the inherent nature of things, the right way of living, and the sacred duty of every individual. It operates at multiple levels: universal dharma (Rita), social dharma (Sadharana), and individual dharma (Svadharma).</p><p style="font-size:15px;color:var(--tx);line-height:1.85">Understanding your own dharma — your unique calling and duty — is the central quest of dharmic life. Krishna tells Arjuna: "Better is one's own dharma, though imperfectly performed, than the dharma of another well performed."</p>`},
+  {id:'yoga', icon:'🧘', name:'Yoga', desc:'Union with the divine — the ancient science of consciousness', count:'18 lessons', progress:0, content:`<h3 style="font-family:'Cinzel',serif;color:var(--gdl);font-size:14px;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px">Paths of Yoga</h3><p style="font-size:15px;color:var(--tx);line-height:1.85;margin-bottom:14px">Yoga means union — the dissolution of the perceived separation between individual and universal. The Bhagavad Gita presents four main paths: <strong style="color:var(--gdl)">Karma Yoga</strong> (action), <strong style="color:var(--gdl)">Jnana Yoga</strong> (knowledge), <strong style="color:var(--gdl)">Bhakti Yoga</strong> (devotion), and <strong style="color:var(--gdl)">Raja Yoga</strong> (meditation).</p><p style="font-size:15px;color:var(--tx);line-height:1.85">Each path leads to the same summit. The wise seeker understands their nature and chooses the path most suited to their temperament — all rivers eventually reach the same ocean.</p>`},
+  {id:'meditation', icon:'🕯️', name:'Meditation', desc:'The science of inner stillness — direct experience of the self', count:'14 lessons', progress:0, content:`<h3 style="font-family:'Cinzel',serif;color:var(--gdl);font-size:14px;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px">The Practice of Meditation</h3><p style="font-size:15px;color:var(--tx);line-height:1.85;margin-bottom:14px">Dhyana (meditation) is the seventh limb of Patanjali's Ashtanga Yoga. It is not mere relaxation but a precise science of directing consciousness inward to its source. The Mandukya Upanishad describes four states of consciousness — waking, dreaming, deep sleep, and Turiya (the fourth) — which is the meditative state of pure awareness.</p><p style="font-size:15px;color:var(--tx);line-height:1.85"><strong style="color:var(--gdl)">Practice:</strong> Sit in a comfortable posture. Close your eyes. Watch the breath — not controlling, simply witnessing. When thoughts arise, gently return to the breath. Begin with 10 minutes daily and expand gradually.</p>`},
+  {id:'devotion', icon:'🪔', name:'Bhakti', desc:'The path of divine love — devotion as the highest yoga', count:'10 lessons', progress:0, content:`<h3 style="font-family:'Cinzel',serif;color:var(--gdl);font-size:14px;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px">Bhakti — The Path of Love</h3><p style="font-size:15px;color:var(--tx);line-height:1.85;margin-bottom:14px">Bhakti Yoga is the yoga of devotion — the direct path of love. The Narada Bhakti Sutras define bhakti as "the highest love for God." Unlike jnana (intellectual knowledge) which can be cold, bhakti is warm, intimate, and immediate. It transforms the devotee through love itself.</p><p style="font-size:15px;color:var(--tx);line-height:1.85">The nine forms of bhakti (Navadha Bhakti) — hearing, singing, remembering, serving the feet, worship, salutation, servitude, friendship, and self-surrender — offer a complete path accessible to all, regardless of intellectual capacity.</p>`},
+  {id:'moksha', icon:'✨', name:'Moksha', desc:'Liberation — the ultimate goal of dharmic life', count:'11 lessons', progress:0, content:`<h3 style="font-family:'Cinzel',serif;color:var(--gdl);font-size:14px;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px">The Goal of Moksha</h3><p style="font-size:15px;color:var(--tx);line-height:1.85;margin-bottom:14px">Moksha is liberation from the cycle of birth and death (samsara) — the recognition of one's true nature as infinite, eternal consciousness. It is not a place reached after death, but a recognition that can happen in this very lifetime. The Jivanmukta is one who is liberated while still living.</p><p style="font-size:15px;color:var(--tx);line-height:1.85">The Upanishads describe moksha as the removal of avidya (ignorance) — the mistaken belief that we are limited, mortal beings. When this veil lifts, what remains is Sat-Chit-Ananda: infinite existence, pure consciousness, absolute bliss.</p>`},
+];
+
+// Daily wisdom data
+const DAILY_WISDOM = [
+  {verse:'Yoga is the journey of the self, through the self, to the self.',meaning:'The greatest adventure unfolds not across oceans or mountains, but in the silent depths of one\'s own being.',src:'Bhagavad Gita · 6.20'},
+  {verse:'The soul is a lamp whose light is steady, for it burns in a shelter where no winds come.',meaning:'Within you there is a stillness that no storm can reach. Return to it always.',src:'Bhagavad Gita · 6.19'},
+  {verse:'There is nothing lost or wasted in this life.',meaning:'Every experience, every suffering, every joy — all of it is the sacred curriculum of the awakening soul.',src:'Bhagavad Gita · 2.40'},
+];
+
+const REFLECTIONS = [
+  {icon:'🌅',title:'Morning Practice',text:'Begin each day with 5 minutes of stillness. Before the mind fills with tasks and thoughts, sit in silence. This seed of awareness will colour the entire day.',src:'Inspired by Yoga Sutras'},
+  {icon:'🙏',title:'Karma Reminder',text:'In every action today, ask: "Am I doing this for the outcome, or for the action itself?" Practice Nishkama Karma — give your best without demanding a result.',src:'Bhagavad Gita · 3.8'},
+  {icon:'🕯️',title:'Evening Reflection',text:'Before sleep, review your day without judgment. Where did you act from dharma? Where did you act from ego? This daily reflection accelerates inner growth.',src:'Vivekachudamani'},
+  {icon:'☀️',title:'Mantra for Today',text:'"Om Namah Shivaya" — I bow to the divine within. Repeat 108 times with a mala, or simply in the heart throughout the day.',src:'Shiva Purana'},
+];
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+window.addEventListener('load', () => {
+  // Check auth
+  const user = checkAuth();
+  if (!user) return;
+
+  if (apiKey) document.getElementById('api-input').value = apiKey;
+  renderSuggestions();
+  renderVerseList('gita');
+  renderDaily();
+  renderTopics();
+  renderBookmarks();
+  initSpeech();
+  addCompatSection();
+});
+
+function addCompatSection() {
+  // Add compatibility checker to chat page below input
+  const chatPage = document.getElementById('pg-chat');
+  if (!chatPage || document.getElementById('compat-section')) return;
+  const div = document.createElement('div');
+  div.id = 'compat-section';
+  div.style.cssText = 'padding:14px 20px;border-top:1px solid rgba(232,114,12,.08);background:rgba(232,114,12,.03);flex-shrink:0';
+  div.innerHTML = `
+    <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--mt);text-transform:uppercase;margin-bottom:10px">🔮 Kundali Compatibility Check</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+      <div style="flex:1;min-width:100px"><label style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:1.5px;color:var(--mt);text-transform:uppercase;display:block;margin-bottom:4px">Partner Rashi</label>
+        <input id="c-rashi" type="text" placeholder="e.g. Vrishabha" style="width:100%;background:var(--dk);border:1px solid var(--br);color:var(--tx);font-family:'EB Garamond',serif;font-size:13px;padding:7px 10px;outline:none;border-radius:2px"></div>
+      <div style="flex:1;min-width:100px"><label style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:1.5px;color:var(--mt);text-transform:uppercase;display:block;margin-bottom:4px">Partner Nakshatra</label>
+        <input id="c-nak" type="text" placeholder="e.g. Rohini" style="width:100%;background:var(--dk);border:1px solid var(--br);color:var(--tx);font-family:'EB Garamond',serif;font-size:13px;padding:7px 10px;outline:none;border-radius:2px"></div>
+      <div style="flex:1;min-width:100px"><label style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:1.5px;color:var(--mt);text-transform:uppercase;display:block;margin-bottom:4px">Partner Name</label>
+        <input id="c-name" type="text" placeholder="Name" style="width:100%;background:var(--dk);border:1px solid var(--br);color:var(--tx);font-family:'EB Garamond',serif;font-size:13px;padding:7px 10px;outline:none;border-radius:2px"></div>
+      <button class="btn-compat" onclick="checkCompat()" style="padding:7px 14px;background:transparent;border:1px solid var(--sf);color:var(--sfl);font-family:'Cinzel',serif;font-size:8px;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;border-radius:2px;white-space:nowrap;height:34px">🔮 Check</button>
+    </div>
+    <div id="compat-result" style="display:none;margin-top:12px;background:var(--pn);border:1px solid var(--br);padding:16px;border-radius:2px"></div>`;
+  chatPage.appendChild(div);
+}
+
+function saveApiKey() {
+  const val = document.getElementById('api-input').value.trim();
+  if (!val) return showToast('Please enter your API key');
+  apiKey = val;
+  localStorage.setItem('deva_api', val);
+  showToast('✦ API Key saved');
+}
+
+function renderSuggestions() {
+  const chips = document.getElementById('wl-chips');
+  chips.innerHTML = SUGGESTIONS[currentPersona].map(s =>
+    `<div class="wl-chip" onclick="quickAsk('${s}')">${s}</div>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function showPage(page, btn) {
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('pg-' + page).classList.add('active');
+
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-btn').forEach(b => {
+      if (b.textContent.toLowerCase().includes(page)) b.classList.add('active');
+    });
+  }
+
+  const titles = {chat:'Divine Chat',scripture:'Scripture Explorer',daily:'Daily Wisdom',learn:'Learning Paths',bookmarks:'Saved Wisdom'};
+  document.getElementById('tb-title').textContent = titles[page] || 'Deva AI';
+
+  const clearBtn = document.getElementById('clear-btn');
+  clearBtn.style.display = page === 'chat' ? 'block' : 'none';
+
+  if (page === 'bookmarks') renderBookmarks();
+  closeSidebar();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sb-overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sb-overlay').classList.remove('show');
+}
+
+// ═══════════════════════════════════════════
+// PERSONA & LANGUAGE
+// ═══════════════════════════════════════════
+function setPersona(p, btn) {
+  currentPersona = p;
+  document.querySelectorAll('.persona-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const cfg = PERSONAS[p];
+  document.getElementById('tb-persona').innerHTML = `<strong>${cfg.icon} ${cfg.name}</strong>&nbsp;· ${cfg.sub}`;
+  renderSuggestions();
+  showToast(`${cfg.icon} ${cfg.name} activated`);
+  closeSidebar();
+}
+
+function setLang(l, btn) {
+  currentLang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  showToast('Language: ' + LANGS[l]);
+}
+
+// ═══════════════════════════════════════════
+// CHAT
+// ═══════════════════════════════════════════
+function quickAsk(q) {
+  document.getElementById('chat-in').value = q;
+  sendMessage();
+}
+
+function clearChat() {
+  chatHistory = [];
+  const msgs = document.getElementById('chat-msgs');
+  msgs.innerHTML = '';
+  // Re-add welcome
+  msgs.innerHTML = `
+    <div class="chat-welcome" id="chat-welcome">
+      <div class="wl-om">🪔</div>
+      <div class="wl-title">Namaste 🙏</div>
+      <div class="wl-sub">Ask me about dharma, karma, life guidance, or explore the wisdom of our sacred scriptures.</div>
+      <div class="wl-verse">
+        <div class="wl-verse-ref">📖 Bhagavad Gita · 2.47</div>
+        <div class="wl-verse-text">"Karmaṇy evādhikāras te mā phaleṣu kadācana" — Your right is to perform your duty, never to the fruits thereof.</div>
+      </div>
+      <div class="wl-chips" id="wl-chips"></div>
+    </div>`;
+  renderSuggestions();
+  showToast('Chat cleared');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('chat-in');
+  if (inp) {
+    inp.addEventListener('input', function() {
+      document.getElementById('char-count').textContent = this.value.length + '/1000';
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+    inp.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+  }
+});
+
+async function sendMessage() {
+  if (isGenerating) return;
+  const inp = document.getElementById('chat-in');
+  const text = inp.value.trim();
+  if (!text) return;
+
+  if (!apiKey) {
+    showToast('⚠ Please add your Anthropic API key in the sidebar');
+    return;
+  }
+
+  // Check plan limit
+  if (!checkQuestionLimit()) return;
+
+  // Log query for admin
+  logQuery(text);
+
+  // Hide welcome
+  const welcome = document.getElementById('chat-welcome');
+  if (welcome) welcome.style.display = 'none';
+
+  inp.value = '';
+  inp.style.height = 'auto';
+  document.getElementById('char-count').textContent = '0/1000';
+  isGenerating = true;
+  document.getElementById('send-btn').disabled = true;
+
+  // Add user message
+  addMessage('user', text);
+  chatHistory.push({role:'user', content: text});
+
+  // Typing indicator
+  const typingId = 'typing-' + Date.now();
+  const msgs = document.getElementById('chat-msgs');
+  const typingEl = document.createElement('div');
+  typingEl.id = typingId;
+  typingEl.className = 'msg-wrap';
+  typingEl.innerHTML = `
+    <div class="msg-av ai">${PERSONAS[currentPersona].icon}</div>
+    <div class="msg-content">
+      <div class="msg-name-row">${PERSONAS[currentPersona].name}</div>
+      <div class="msg-bubble ai"><div class="typing-ind"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>
+    </div>`;
+  msgs.appendChild(typingEl);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  const langInstr = currentLang !== 'en' ? `\nRespond in ${LANGS[currentLang]}. Keep all scripture references and verse text in original Sanskrit/language, but explain in ${LANGS[currentLang]}.` : '';
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1200,
+        system: PERSONAS[currentPersona].system + langInstr,
+        messages: chatHistory
+      })
+    });
+
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error.message);
+    const raw = data.content[0].text;
+    chatHistory.push({role:'assistant', content: raw});
+
+    typingEl.remove();
+    addMessage('ai', raw, true);
+
+  } catch(e) {
+    typingEl.remove();
+    addMessage('ai', `I apologise, dear seeker — a divine interruption has occurred. ${e.message.includes('api_key') ? 'Please check your API key in the sidebar.' : 'Please try again. 🙏'}`, false);
+  }
+
+  isGenerating = false;
+  document.getElementById('send-btn').disabled = false;
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addMessage(role, text, parseVerses = false) {
+  const msgs = document.getElementById('chat-msgs');
+  const cfg = PERSONAS[currentPersona];
+  const isAI = role === 'ai';
+
+  // Parse verse blocks
+  let processedHtml = escapeHtml(text);
+  if (parseVerses && isAI) {
+    processedHtml = processedHtml.replace(/\[VERSE\](.*?)\[\/VERSE\]/gs, (match, content) => {
+      const parts = content.split('||');
+      const ref = parts[0] || '';
+      const san = parts[1] || '';
+      const trans = parts[2] || '';
+      return `</p><div class="verse-block"><div class="vb-ref">📖 ${ref}</div><div class="vb-sanskrit">${san}</div><div class="vb-meaning">${trans}</div></div><p>`;
+    });
+    // Bold **text**
+    processedHtml = processedHtml.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    processedHtml = processedHtml.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    // Newlines
+    processedHtml = processedHtml.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+    processedHtml = '<p>' + processedHtml + '</p>';
+  }
+
+  const el = document.createElement('div');
+  el.className = 'msg-wrap' + (role === 'user' ? ' user' : '');
+  el.innerHTML = `
+    <div class="msg-av ${role}">${isAI ? cfg.icon : '👤'}</div>
+    <div class="msg-content">
+      <div class="msg-name-row">${isAI ? cfg.name : 'You'}</div>
+      <div class="msg-bubble ${role}">${parseVerses ? processedHtml : escapeHtml(text)}</div>
+      ${isAI ? `<div class="msg-actions">
+        <button class="msg-act-btn" onclick="bookmarkAnswer(this)" title="Save">⭐ Save</button>
+        <button class="msg-act-btn" onclick="speakText(this)" title="Speak">🔊 Speak</button>
+        <button class="msg-act-btn" onclick="copyText(this)" title="Copy">📋 Copy</button>
+      </div>` : ''}
+    </div>`;
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════
+// MESSAGE ACTIONS
+// ═══════════════════════════════════════════
+function bookmarkAnswer(btn) {
+  const bubble = btn.closest('.msg-content').querySelector('.msg-bubble');
+  const text = bubble.innerText.slice(0, 200) + (bubble.innerText.length > 200 ? '…' : '');
+  bookmarks.unshift({type:'Answer', ref: PERSONAS[currentPersona].name, text, sub: new Date().toLocaleDateString(), id: Date.now()});
+  localStorage.setItem('deva_bookmarks', JSON.stringify(bookmarks));
+  btn.textContent = '✓ Saved';
+  btn.classList.add('saved');
+  showToast('⭐ Saved to bookmarks');
+}
+
+function speakText(btn) {
+  const bubble = btn.closest('.msg-content').querySelector('.msg-bubble');
+  const text = bubble.innerText;
+  if (speechSynth.speaking) { speechSynth.cancel(); return; }
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.rate = 0.88; utt.pitch = 0.95;
+  const voices = speechSynth.getVoices();
+  const preferred = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google'));
+  if (preferred) utt.voice = preferred;
+  speechSynth.speak(utt);
+  showToast('🔊 Speaking…');
+}
+
+function copyText(btn) {
+  const bubble = btn.closest('.msg-content').querySelector('.msg-bubble');
+  navigator.clipboard.writeText(bubble.innerText);
+  showToast('📋 Copied to clipboard');
+}
+
+// ═══════════════════════════════════════════
+// VOICE INPUT
+// ═══════════════════════════════════════════
+function initSpeech() {
+  if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SR();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-IN';
+    recognition.onresult = (e) => {
+      const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+      document.getElementById('chat-in').value = transcript;
+    };
+    recognition.onend = () => {
+      isListening = false;
+      document.getElementById('voice-btn').classList.remove('listening');
+    };
+  }
+}
+
+function toggleVoice() {
+  if (!recognition) { showToast('Voice not supported in this browser'); return; }
+  if (isListening) { recognition.stop(); }
+  else { recognition.start(); isListening = true; document.getElementById('voice-btn').classList.add('listening'); showToast('🎙️ Listening…'); }
+}
+
+// ═══════════════════════════════════════════
+// SCRIPTURE EXPLORER
+// ═══════════════════════════════════════════
+let currentScripture = 'gita';
+let selectedVerse = null;
+
+function setScripture(s, btn) {
+  currentScripture = s;
+  document.querySelectorAll('.sc-tab').forEach(t => t.classList.remove('on'));
+  btn.classList.add('on');
+  renderVerseList(s);
+  document.getElementById('sc-detail').innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--mt);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px">Select a verse from the list 🙏</div>`;
+}
+
+function renderVerseList(scripture, filter = '') {
+  const list = document.getElementById('verse-list-sc');
+  const verses = SCRIPTURES[scripture] || [];
+  const filtered = filter ? verses.filter(v =>
+    v.ref.toLowerCase().includes(filter.toLowerCase()) ||
+    v.trans.toLowerCase().includes(filter.toLowerCase()) ||
+    v.tags.some(t => t.toLowerCase().includes(filter.toLowerCase()))
+  ) : verses;
+
+  list.innerHTML = filtered.map((v, i) =>
+    `<div class="vi${selectedVerse === i ? ' sel' : ''}" onclick="showVerse(${i})">
+      <div class="vi-ref">${v.ref}</div>
+      <div class="vi-prev">${v.san.replace(/\n/g,' ').slice(0,45)}…</div>
+    </div>`
+  ).join('');
+}
+
+function filterVerses(q) { renderVerseList(currentScripture, q); }
+
+function showVerse(idx) {
+  selectedVerse = idx;
+  renderVerseList(currentScripture, document.getElementById('sc-search-in').value);
+  const v = SCRIPTURES[currentScripture][idx];
+  const isSaved = bookmarks.some(b => b.ref === v.ref);
+  document.getElementById('sc-detail').innerHTML = `
+    <div class="sd-ref">
+      <span>📖 ${v.ref}</span>
+      <div class="sd-actions">
+        <button class="sd-btn${isSaved?' saved':''}" id="save-verse-btn" onclick="saveVerse(${idx})">${isSaved?'✓ Saved':'⭐ Save'}</button>
+        <button class="sd-btn" onclick="askAboutVerse('${v.ref}')">💬 Ask Deva</button>
+      </div>
+    </div>
+    <div class="sd-sanskrit">${v.san.replace(/\n/g,'<br>')}</div>
+    <div class="sd-trans"><strong style="color:var(--gdl);font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;text-transform:uppercase">Translation</strong><br><br>${v.trans}</div>
+    <div class="sd-exp"><strong style="color:var(--gdl);font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;text-transform:uppercase">Explanation</strong><br><br>${v.exp}</div>
+    <div class="sd-tags">${v.tags.map(t => `<span class="sd-tag">${t}</span>`).join('')}</div>
+    <button class="sd-ask-btn" onclick="askAboutVerse('${v.ref}')">💬 Ask Deva AI to explain this verse</button>
+  `;
+}
+
+function saveVerse(idx) {
+  const v = SCRIPTURES[currentScripture][idx];
+  const exists = bookmarks.findIndex(b => b.ref === v.ref);
+  if (exists >= 0) {
+    bookmarks.splice(exists, 1);
+    document.getElementById('save-verse-btn').textContent = '⭐ Save';
+    document.getElementById('save-verse-btn').classList.remove('saved');
+    showToast('Removed from bookmarks');
+  } else {
+    bookmarks.unshift({type:'Verse', ref: v.ref, text: v.san.split('\n')[0], sub: v.trans.slice(0,80)+'…', id: Date.now()});
+    document.getElementById('save-verse-btn').textContent = '✓ Saved';
+    document.getElementById('save-verse-btn').classList.add('saved');
+    showToast('⭐ Verse saved');
+  }
+  localStorage.setItem('deva_bookmarks', JSON.stringify(bookmarks));
+}
+
+function askAboutVerse(ref) {
+  showPage('chat', null);
+  document.querySelectorAll('.nav-btn').forEach(b => { if(b.textContent.includes('Chat')) b.classList.add('active'); else b.classList.remove('active'); });
+  setTimeout(() => {
+    document.getElementById('chat-in').value = `Please explain the verse ${ref} in detail — its meaning, context, and how I can apply it in my life.`;
+    sendMessage();
+  }, 300);
+}
+
+// ═══════════════════════════════════════════
+// DAILY WISDOM
+// ═══════════════════════════════════════════
+function renderDaily() {
+  const today = new Date();
+  const idx = today.getDate() % DAILY_WISDOM.length;
+  const w = DAILY_WISDOM[idx];
+  const dateStr = today.toLocaleDateString('en-IN', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+
+  const wrap = document.getElementById('daily-wrap');
+  wrap.innerHTML = `
+    <div class="daily-hero">
+      <div class="dh-date">${dateStr}</div>
+      <div class="dh-badge">Today's Sacred Verse</div>
+      <div class="dh-verse">"${w.verse}"</div>
+      <div class="dh-meaning">${w.meaning}</div>
+      <div class="dh-src">— ${w.src}</div>
+    </div>
+    <div class="daily-grid">
+      ${REFLECTIONS.map(r => `
+        <div class="dg-card" onclick="askAboutTopic('${r.title}')">
+          <span class="dg-icon">${r.icon}</span>
+          <div class="dg-title">${r.title}</div>
+          <div class="dg-text">${r.text}</div>
+          <div class="dg-src">${r.src}</div>
+        </div>
+      `).join('')}
+    </div>`;
+}
+
+function askAboutTopic(topic) {
+  showPage('chat', null);
+  document.querySelectorAll('.nav-btn').forEach(b => { if(b.textContent.includes('Chat')) b.classList.add('active'); else b.classList.remove('active'); });
+  setTimeout(() => {
+    document.getElementById('chat-in').value = `Tell me more about "${topic}" and how I can practice it today.`;
+    sendMessage();
+  }, 300);
+}
+
+// ═══════════════════════════════════════════
+// LEARNING PATHS
+// ═══════════════════════════════════════════
+function renderTopics() {
+  const grid = document.getElementById('topic-grid');
+  grid.innerHTML = TOPICS.map(t => `
+    <div class="topic-card" onclick="openTopic('${t.id}', this)" id="tc-${t.id}">
+      <span class="tc-icon">${t.icon}</span>
+      <div class="tc-name">${t.name}</div>
+      <div class="tc-desc">${t.desc}</div>
+      <div class="tc-count">${t.count}</div>
+      <div class="tc-progress"><div class="tc-bar" style="width:${t.progress}%"></div></div>
+    </div>
+  `).join('');
+}
+
+function openTopic(id, el) {
+  document.querySelectorAll('.topic-card').forEach(c => c.classList.remove('active-topic'));
+  el.classList.add('active-topic');
+  const topic = TOPICS.find(t => t.id === id);
+  const detail = document.getElementById('topic-detail');
+  detail.className = 'topic-detail show';
+  detail.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;gap:12px;flex-wrap:wrap">
+      <div>${topic.content}</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+      <button class="sd-ask-btn" onclick="askAboutTopic('${topic.name}')">💬 Ask Deva AI about ${topic.name}</button>
+      <button class="sd-ask-btn" style="border-color:var(--brg);color:var(--gdl)" onclick="findVerses('${topic.name}')">📜 Find related verses</button>
+    </div>`;
+  detail.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function findVerses(topic) {
+  showPage('scripture', null);
+  setTimeout(() => {
+    document.getElementById('sc-search-in').value = topic;
+    filterVerses(topic);
+  }, 200);
+}
+
+// ═══════════════════════════════════════════
+// BOOKMARKS
+// ═══════════════════════════════════════════
+function renderBookmarks() {
+  const list = document.getElementById('bookmarks-list');
+  if (bookmarks.length === 0) {
+    list.innerHTML = '<div class="bm-empty">No saved wisdom yet. Star answers and verses to see them here. 🙏</div>';
+    return;
+  }
+  list.innerHTML = `<div class="bookmark-list">${
+    bookmarks.map(b => `
+      <div class="bm-item">
+        <div class="bm-type">${b.type}</div>
+        <div class="bm-body">
+          <div class="bm-ref">${b.ref}</div>
+          <div class="bm-text">${b.text}</div>
+          <div class="bm-sub">${b.sub}</div>
+        </div>
+        <button class="bm-del" onclick="deleteBookmark(${b.id})" title="Remove">✕</button>
+      </div>
+    `).join('')
+  }</div>`;
+}
+
+function deleteBookmark(id) {
+  bookmarks = bookmarks.filter(b => b.id !== id);
+  localStorage.setItem('deva_bookmarks', JSON.stringify(bookmarks));
+  renderBookmarks();
+  showToast('Removed from saved');
+}
+
+// ═══════════════════════════════════════════
+// FIREBASE AUTH CHECK
+// ═══════════════════════════════════════════
+function checkAuth() {
+  const user = JSON.parse(localStorage.getItem('deva_current_user') || 'null');
+  if (!user) {
+    window.location.href = 'index.html';
+    return null;
+  }
+  // Show user info in sidebar
+  const footer = document.querySelector('.sb-footer');
+  if (footer) {
+    footer.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        ${user.photoURL ? `<img src="${user.photoURL}" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--br)">` : '<span style="font-size:20px">🪔</span>'}
+        <div>
+          <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--gdl);text-transform:uppercase">${user.name?.split(' ')[0] || 'Seeker'}</div>
+          <div style="font-size:10px;color:var(--mt)">${user.plan || 'free'} plan</div>
+        </div>
+      </div>
+      <button onclick="logout()" style="width:100%;padding:6px;background:transparent;border:1px solid rgba(139,32,32,.4);color:#e87d94;font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;border-radius:2px;margin-bottom:8px">Sign Out</button>
+      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:2px;color:var(--mt);text-align:center;text-transform:uppercase">Built by <span style="color:var(--sfl)">Sushvin AI Labs</span></div>`;
+  }
+  // Apply plan limits
+  if (user.plan === 'free') {
+    const today = new Date().toDateString();
+    const lastDate = localStorage.getItem('deva_last_q_date');
+    if (lastDate !== today) {
+      localStorage.setItem('deva_q_count', '0');
+      localStorage.setItem('deva_last_q_date', today);
+    }
+  }
+  return user;
+}
+
+function logout() {
+  localStorage.removeItem('deva_current_user');
+  window.location.href = 'index.html';
+}
+
+function checkQuestionLimit() {
+  const user = JSON.parse(localStorage.getItem('deva_current_user') || 'null');
+  if (!user || user.plan !== 'free') return true;
+  const count = parseInt(localStorage.getItem('deva_q_count') || '0');
+  if (count >= 10) {
+    showToast('⚠ Free plan limit: 10 questions/day. Upgrade to Sadhaka for unlimited!');
+    return false;
+  }
+  localStorage.setItem('deva_q_count', String(count + 1));
+  return true;
+}
+
+function logQuery(question) {
+  const user = JSON.parse(localStorage.getItem('deva_current_user') || 'null');
+  const queries = JSON.parse(localStorage.getItem('deva_queries') || '[]');
+  queries.unshift({
+    user: user?.name || 'Anonymous',
+    email: user?.email || '',
+    question: question,
+    persona: PERSONAS[currentPersona]?.name || 'Krishna Mode',
+    time: new Date().toLocaleString('en-IN'),
+    id: Date.now()
+  });
+  // Keep last 500 queries
+  if (queries.length > 500) queries.splice(500);
+  localStorage.setItem('deva_queries', JSON.stringify(queries));
+  // Update stats
+  const stats = JSON.parse(localStorage.getItem('deva_admin_stats') || '{"totalUsers":0,"totalQuestions":0,"revenue":0}');
+  stats.totalQuestions = (stats.totalQuestions || 0) + 1;
+  localStorage.setItem('deva_admin_stats', JSON.stringify(stats));
+}
+
+// ═══════════════════════════════════════════
+// COMPATIBILITY CHECKER
+// ═══════════════════════════════════════════
+async function checkCompat() {
+  const partnerRashi = document.getElementById('c-rashi')?.value.trim();
+  const partnerNak = document.getElementById('c-nak')?.value.trim();
+  const partnerName = document.getElementById('c-name')?.value.trim() || 'Partner';
+  if (!partnerRashi) return showToast('⚠ Please enter partner Rashi');
+  if (!apiKey) return showToast('⚠ Add your Anthropic API key in sidebar first');
+
+  const btn = document.querySelector('#pg-chat .compat-form .btn-compat');
+  if (btn) { btn.disabled = true; btn.textContent = 'Calculating…'; }
+
+  const prompt = `You are a Vedic astrologer. Calculate Ashta Koota compatibility between:
+Person 1: Rashi=${currentChart?.rashi || 'Unknown'}, Nakshatra=${currentChart?.nakshatra || 'Unknown'}
+Person 2 (${partnerName}): Rashi=${partnerRashi}, Nakshatra=${partnerNak || 'unknown'}
+Return ONLY JSON:
+{"total_score":28,"max_score":36,"percentage":78,"rating":"Good Match","kootas":[{"name":"Varna","score":1,"max":1},{"name":"Vashya","score":2,"max":2},{"name":"Tara","score":3,"max":3},{"name":"Yoni","score":3,"max":4},{"name":"Graha Maitri","score":4,"max":5},{"name":"Gana","score":5,"max":6},{"name":"Bhakoot","score":5,"max":7},{"name":"Nadi","score":7,"max":8}],"summary":"2 sentence summary of compatibility."}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 600, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await res.json();
+    const raw = data.content[0].text;
+    const cm = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    const colors = ['#ff6666','#ffaa44','#ffdd44','#88dd44','#44cc88'];
+    const pct = cm.percentage || Math.round((cm.total_score / cm.max_score) * 100);
+    const ci = pct < 40 ? 0 : pct < 55 ? 1 : pct < 70 ? 2 : pct < 85 ? 3 : 4;
+    const el = document.getElementById('compat-result');
+    el.innerHTML = `
+      <div style="text-align:center;margin-bottom:16px">
+        <div style="font-family:'Cinzel Decorative',serif;font-size:42px;color:${colors[ci]};line-height:1">${cm.total_score}/${cm.max_score}</div>
+        <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--dm);text-transform:uppercase;margin-top:5px">${cm.rating} · ${pct}%</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+        ${cm.kootas.map(k => {
+          const kp = Math.round((k.score / k.max) * 100);
+          return `<div style="display:flex;align-items:center;gap:10px;font-size:13px">
+            <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:var(--dm);min-width:88px;text-transform:uppercase">${k.name}</div>
+            <div style="flex:1;height:4px;background:rgba(232,114,12,.1);border-radius:2px;overflow:hidden"><div style="height:100%;width:${kp}%;background:${colors[ci]};border-radius:2px;transition:width 1s ease"></div></div>
+            <div style="font-family:'Cinzel',serif;font-size:9px;color:var(--gdl);min-width:28px;text-align:right">${k.score}/${k.max}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <p style="font-size:14px;color:var(--tx);line-height:1.7;border-top:1px solid var(--br);padding-top:12px">${cm.summary}</p>`;
+    el.style.display = 'block';
+  } catch(e) { showToast('Could not calculate. Try again.'); }
+  if (btn) { btn.disabled = false; btn.textContent = '🔮 Check Compatibility'; }
+}
+
+// ═══════════════════════════════════════════
+// PDF DOWNLOAD
+// ═══════════════════════════════════════════
+function downloadPDF() {
+  const user = JSON.parse(localStorage.getItem('deva_current_user') || '{}');
+  const name = user.name || 'Seeker';
+  const win = window.open('', '_blank');
+  const body = document.getElementById('chat-msgs')?.innerHTML || '';
+  win.document.write(`<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <title>Deva AI — ${name} — Chat Export</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    <style>
+      body{background:#fff;color:#1a1408;font-family:'EB Garamond',serif;font-size:14px;line-height:1.7;padding:30px;max-width:800px;margin:0 auto}
+      h1{font-family:'Cinzel',serif;font-size:22px;color:#8b6914;text-align:center;letter-spacing:3px;margin-bottom:6px}
+      .sub{text-align:center;font-style:italic;color:#9a8870;margin-bottom:28px;font-size:15px}
+      .msg-wrap{margin-bottom:16px;page-break-inside:avoid}
+      .msg-bubble{padding:12px 16px;border-radius:4px;font-size:14px;line-height:1.8}
+      .msg-bubble.ai{background:#fdf8ee;border:1px solid #e8c070;border-left:3px solid #c9943a}
+      .msg-bubble.user{background:#f8f4ff;border:1px solid #c4a0e8;text-align:right}
+      .msg-name-row{font-family:'Cinzel',serif;font-size:8px;letter-spacing:1.5px;color:#9a8870;text-transform:uppercase;margin-bottom:4px}
+      .verse-block{background:#fdf5e0;border:1px solid #e8c070;border-left:3px solid #c9943a;padding:10px 14px;margin-top:10px;border-radius:0 4px 4px 0}
+      .vb-ref{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:#8b6914;text-transform:uppercase;margin-bottom:4px}
+      .vb-sanskrit{font-style:italic;font-size:16px;color:#c9943a}
+      .vb-meaning{font-size:12px;color:#9a8870}
+      strong{color:#8b6914} em{color:#c9943a}
+      .msg-av,.msg-actions,.chat-welcome,.wl-chips{display:none}
+      footer{text-align:center;margin-top:28px;padding-top:14px;border-top:1px solid #e8c070;font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:#9a8870;text-transform:uppercase}
+      @page{margin:1.5cm}
+    </style>
+    </head><body>
+    <h1>🪔 Deva AI — Wisdom Export</h1>
+    <div class="sub">${name} · ${new Date().toLocaleDateString('en-IN', {weekday:'long',year:'numeric',month:'long',day:'numeric'})} · ${PERSONAS[currentPersona]?.name}</div>
+    ${body}
+    <footer>Deva AI · Built by Sushvin AI Labs · devaai.app</footer>
+    <script>window.onload=()=>{window.print()}<\/script>
+    </body></html>`);
+  win.document.close();
+}
+
+// ═══════════════════════════════════════════
+// SHARE
+// ═══════════════════════════════════════════
+function showShareModal() {
+  const m = document.getElementById('share-modal');
+  m.style.display = 'flex';
+}
+function closeShareModal() {
+  document.getElementById('share-modal').style.display = 'none';
+}
+function shareWhatsApp() {
+  const user = JSON.parse(localStorage.getItem('deva_current_user') || '{}');
+  const txt = `🪔 *Deva AI — Divine Wisdom*\n\nI'm using Deva AI to explore dharma, karma and the Bhagavad Gita with AI guidance.\n\n✨ Persona: ${PERSONAS[currentPersona]?.name}\n🙏 Built by Sushvin AI Labs\n\nTry it: https://devaai.app`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
+  closeShareModal();
+}
+function shareTelegram() {
+  const txt = `🪔 Deva AI — Ancient wisdom powered by AI. Explore Bhagavad Gita, dharma & more.`;
+  window.open(`https://t.me/share/url?url=https://devaai.app&text=${encodeURIComponent(txt)}`, '_blank');
+  closeShareModal();
+}
+function copyAppLink() {
+  navigator.clipboard.writeText('https://devaai.app');
+  showToast('🔗 Link copied!');
+  closeShareModal();
+}
+
+// ═══════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>

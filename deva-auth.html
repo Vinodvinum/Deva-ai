@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deva AI — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=EB+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<style>
+:root{
+  --sf:#e8720c;--sfl:#f5a44a;--sfd:rgba(232,114,12,.15);
+  --gd:#c9943a;--gdl:#e8c070;--gdp:rgba(232,192,112,.1);
+  --dp:#05030a;--dk:#0c0816;--pn:#120f1e;
+  --br:rgba(232,114,12,.18);--brg:rgba(232,192,112,.2);
+  --tx:#f0e8d8;--dm:#9a8870;--mt:#3a3428;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--dp);color:var(--tx);font-family:'EB Garamond',serif;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+
+.bg{position:fixed;inset:0;pointer-events:none;z-index:0}
+.bg::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 50% at 50% -5%,rgba(232,114,12,.18) 0%,transparent 60%),
+  radial-gradient(ellipse 50% 40% at 90% 100%,rgba(196,85,106,.1) 0%,transparent 50%)}
+.bg::after{content:'';position:absolute;inset:0;
+  background-image:
+  radial-gradient(1px 1px at 10% 15%,rgba(255,220,180,.4) 0%,transparent 100%),
+  radial-gradient(1px 1px at 30% 45%,rgba(255,200,150,.3) 0%,transparent 100%),
+  radial-gradient(1px 1px at 55% 8%,rgba(255,220,180,.35) 0%,transparent 100%),
+  radial-gradient(1px 1px at 75% 65%,rgba(255,200,150,.25) 0%,transparent 100%),
+  radial-gradient(2px 2px at 88% 20%,rgba(255,210,160,.35) 0%,transparent 100%),
+  radial-gradient(1px 1px at 20% 80%,rgba(255,220,180,.3) 0%,transparent 100%)}
+
+#app{position:relative;z-index:1;flex:1;display:flex;flex-direction:column}
+
+/* ── NAV ── */
+nav{padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--br);background:rgba(5,3,10,.7);backdrop-filter:blur(12px)}
+.nav-logo{font-family:'Cinzel Decorative',serif;font-size:18px;color:var(--gdl);letter-spacing:2px;display:flex;align-items:center;gap:8px;text-decoration:none}
+.nav-logo span{animation:flame 2.5s ease-in-out infinite;filter:drop-shadow(0 0 6px rgba(232,114,12,.5))}
+@keyframes flame{0%,100%{filter:drop-shadow(0 0 4px rgba(232,114,12,.5))}50%{filter:drop-shadow(0 0 14px rgba(232,192,112,.8))}}
+.nav-link{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--dm);text-transform:uppercase;text-decoration:none;transition:color .2s}
+.nav-link:hover{color:var(--gdl)}
+
+/* ── MAIN LAYOUT ── */
+.main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+
+/* ── AUTH TABS ── */
+.auth-wrap{width:100%;max-width:460px}
+.auth-tabs{display:flex;margin-bottom:2px;background:var(--br)}
+.auth-tab{flex:1;padding:14px;background:var(--pn);font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--dm);text-transform:uppercase;cursor:pointer;transition:all .2s;border:1px solid transparent;text-align:center}
+.auth-tab.active{background:var(--sfd);border-color:var(--sf);color:var(--sfl)}
+.auth-tab:hover:not(.active){background:rgba(232,114,12,.05);color:var(--gdl)}
+
+/* ── AUTH CARD ── */
+.auth-card{background:var(--pn);border:1px solid var(--br);padding:36px 34px 40px;position:relative}
+.auth-card::before,.auth-card::after{content:'✦';position:absolute;font-size:10px;color:var(--gd);opacity:.35}
+.auth-card::before{top:12px;left:14px}.auth-card::after{bottom:12px;right:14px}
+
+.auth-logo{text-align:center;margin-bottom:28px}
+.auth-logo-icon{font-size:36px;display:block;margin-bottom:8px;filter:drop-shadow(0 0 12px rgba(232,114,12,.4))}
+.auth-logo-text{font-family:'Cinzel Decorative',serif;font-size:22px;color:var(--gdl);letter-spacing:3px}
+.auth-tagline{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--dm);margin-top:4px}
+
+.form-panel{display:none}
+.form-panel.active{display:block}
+
+.field{margin-bottom:18px}
+.field label{display:block;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--dm);text-transform:uppercase;margin-bottom:7px}
+.field input{width:100%;background:var(--dk);border:1px solid var(--br);color:var(--tx);font-family:'EB Garamond',serif;font-size:15px;padding:11px 14px;outline:none;transition:border-color .2s;border-radius:2px}
+.field input:focus{border-color:var(--sf)}
+.field input::placeholder{color:var(--mt)}
+
+.plan-selector{margin-bottom:20px}
+.plan-selector label{display:block;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--dm);text-transform:uppercase;margin-bottom:10px}
+.plan-opts{display:flex;flex-direction:column;gap:8px}
+.plan-opt{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--dk);border:1px solid var(--br);cursor:pointer;transition:all .2s;border-radius:2px}
+.plan-opt:hover,.plan-opt.sel{border-color:var(--sf);background:var(--sfd)}
+.plan-opt input[type=radio]{accent-color:var(--sf);width:14px;height:14px}
+.plan-opt-info{flex:1}
+.plan-opt-name{font-family:'Cinzel',serif;font-size:11px;color:var(--gdl);letter-spacing:1px;text-transform:uppercase}
+.plan-opt-desc{font-size:12px;color:var(--dm);margin-top:2px}
+.plan-opt-price{font-family:'Cinzel',serif;font-size:16px;color:var(--sfl)}
+.plan-opt.sel .plan-opt-name{color:var(--sfl)}
+
+.divider-text{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--mt);font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;text-transform:uppercase}
+.divider-text::before,.divider-text::after{content:'';flex:1;height:1px;background:var(--br)}
+
+.btn-primary{width:100%;padding:14px;background:linear-gradient(135deg,var(--sf),var(--gd));border:none;color:#05030a;font-family:'Cinzel',serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;font-weight:700;transition:all .3s;border-radius:2px}
+.btn-primary:hover{box-shadow:0 8px 24px rgba(232,114,12,.4);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+.btn-google{width:100%;padding:12px;background:transparent;border:1px solid var(--brg);color:var(--gdl);font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;border-radius:2px;margin-bottom:4px}
+.btn-google:hover{background:var(--gdp);border-color:var(--gdl)}
+
+.auth-err{background:rgba(139,32,32,.15);border:1px solid rgba(180,60,60,.3);padding:10px 14px;color:#ffaaaa;font-size:13px;margin-bottom:14px;display:none;border-radius:2px}
+.auth-success{background:rgba(30,100,50,.15);border:1px solid rgba(60,160,80,.3);padding:10px 14px;color:#a0ffb8;font-size:13px;margin-bottom:14px;display:none;border-radius:2px}
+
+.auth-footer{text-align:center;margin-top:20px;font-size:13px;color:var(--dm);font-family:'Cormorant Garamond',serif}
+.auth-footer a{color:var(--sfl);text-decoration:none}
+.auth-footer a:hover{text-decoration:underline}
+
+.terms{font-size:12px;color:var(--mt);text-align:center;margin-top:14px;line-height:1.6}
+.terms a{color:var(--dm);text-decoration:none}
+
+/* Plan badges */
+.free-badge{font-family:'Cinzel',serif;font-size:7px;letter-spacing:1px;background:rgba(42,138,122,.2);border:1px solid rgba(42,138,122,.4);color:#7fffc8;padding:2px 7px;border-radius:2px;margin-left:6px;text-transform:uppercase}
+.pro-badge{font-family:'Cinzel',serif;font-size:7px;letter-spacing:1px;background:var(--sfd);border:1px solid var(--sf);color:var(--sfl);padding:2px 7px;border-radius:2px;margin-left:6px;text-transform:uppercase}
+
+/* Loading overlay */
+.load-overlay{display:none;position:fixed;inset:0;background:rgba(5,3,10,.9);z-index:100;align-items:center;justify-content:center;flex-direction:column;gap:20px}
+.load-overlay.show{display:flex}
+.spin{width:50px;height:50px;border:1px solid var(--br);border-top-color:var(--sf);border-radius:50%;animation:spin 1.2s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-text{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--sfl);text-transform:uppercase}
+
+/* Footer */
+footer{padding:20px 32px;border-top:1px solid var(--br);text-align:center;font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--mt);text-transform:uppercase}
+footer strong{color:var(--sfl)}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;right:20px;z-index:200;background:rgba(12,8,22,.95);border:1px solid var(--gd);padding:10px 16px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:1.5px;color:var(--gdl);text-transform:uppercase;transform:translateY(60px);transition:transform .3s;border-radius:3px}
+.toast.show{transform:translateY(0)}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div id="app">
+
+<nav>
+  <a href="#" class="nav-logo"><span>🪔</span> DEVA AI</a>
+  <a href="deva-ai.html" class="nav-link">← Back to App</a>
+</nav>
+
+<div class="main">
+  <div class="auth-wrap">
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchTab('login')">Sign In</div>
+      <div class="auth-tab" onclick="switchTab('signup')">Create Account</div>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-logo">
+        <span class="auth-logo-icon">🪔</span>
+        <div class="auth-logo-text">DEVA AI</div>
+        <div class="auth-tagline">Ancient Wisdom · Modern Intelligence</div>
+      </div>
+
+      <!-- ── LOGIN PANEL ── -->
+      <div class="form-panel active" id="panel-login">
+        <div class="auth-err" id="login-err"></div>
+        <div class="auth-success" id="login-success"></div>
+
+        <button class="btn-google" onclick="googleAuth()">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continue with Google
+        </button>
+
+        <div class="divider-text">or</div>
+
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" id="login-email" placeholder="your@email.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="login-pass" placeholder="Your password" autocomplete="current-password">
+        </div>
+
+        <div style="text-align:right;margin-bottom:18px">
+          <a href="#" style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--dm);text-transform:uppercase" onclick="forgotPassword()">Forgot Password?</a>
+        </div>
+
+        <button class="btn-primary" onclick="loginUser()">✦ &nbsp; Sign In &nbsp; ✦</button>
+
+        <div class="auth-footer" style="margin-top:16px">
+          Don't have an account? <a href="#" onclick="switchTab('signup')">Create one free</a>
+        </div>
+      </div>
+
+      <!-- ── SIGNUP PANEL ── -->
+      <div class="form-panel" id="panel-signup">
+        <div class="auth-err" id="signup-err"></div>
+        <div class="auth-success" id="signup-success"></div>
+
+        <button class="btn-google" onclick="googleAuth()">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Sign up with Google
+        </button>
+
+        <div class="divider-text">or</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field" style="margin-bottom:0">
+            <label>First Name</label>
+            <input type="text" id="signup-fname" placeholder="Arjuna">
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label>Last Name</label>
+            <input type="text" id="signup-lname" placeholder="Kumar">
+          </div>
+        </div>
+        <div style="margin-bottom:18px"></div>
+
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" id="signup-email" placeholder="your@email.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="signup-pass" placeholder="Minimum 8 characters" autocomplete="new-password">
+        </div>
+
+        <div class="plan-selector">
+          <label>Choose Your Path</label>
+          <div class="plan-opts">
+            <div class="plan-opt sel" onclick="selectPlan('free',this)">
+              <input type="radio" name="plan" value="free" checked>
+              <div class="plan-opt-info">
+                <div class="plan-opt-name">Shishya <span class="free-badge">Free</span></div>
+                <div class="plan-opt-desc">10 questions/day · Basic features</div>
+              </div>
+              <div class="plan-opt-price">₹0</div>
+            </div>
+            <div class="plan-opt" onclick="selectPlan('sadhaka',this)">
+              <input type="radio" name="plan" value="sadhaka">
+              <div class="plan-opt-info">
+                <div class="plan-opt-name">Sadhaka <span class="pro-badge">Popular</span></div>
+                <div class="plan-opt-desc">Unlimited · All personas · Voice</div>
+              </div>
+              <div class="plan-opt-price">₹199/mo</div>
+            </div>
+            <div class="plan-opt" onclick="selectPlan('guru',this)">
+              <input type="radio" name="plan" value="guru">
+              <div class="plan-opt-info">
+                <div class="plan-opt-name">Guru</div>
+                <div class="plan-opt-desc">Everything + API + White-label</div>
+              </div>
+              <div class="plan-opt-price">₹499/mo</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-primary" id="signup-btn" onclick="signupUser()">✦ &nbsp; Create Account &nbsp; ✦</button>
+
+        <div class="terms">
+          By creating an account you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>© 2025 Deva AI · Built by <strong>Sushvin AI Labs</strong> · All rights reserved</footer>
+</div><!-- #app -->
+
+<div class="load-overlay" id="loader">
+  <div class="spin"></div>
+  <div class="load-text" id="load-text">Signing you in…</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── SIMPLE LOCAL AUTH (replace with Firebase/Supabase for production) ──
+// In production: integrate Firebase Auth for Google Sign-in + email/password
+
+let selectedPlan = 'free';
+let RAZORPAY_KEY = 'YOUR_RAZORPAY_KEY'; // Replace with your key
+
+const PLAN_PRICES = { sadhaka: 19900, guru: 49900 }; // in paise
+
+// Get existing users from localStorage (mock DB — use real DB in production)
+function getUsers() { return JSON.parse(localStorage.getItem('deva_users') || '{}'); }
+function saveUsers(u) { localStorage.setItem('deva_users', JSON.stringify(u)); }
+function getCurrentUser() { return JSON.parse(localStorage.getItem('deva_current_user') || 'null'); }
+
+// Redirect if already logged in
+window.addEventListener('load', () => {
+  const user = getCurrentUser();
+  if (user) window.location.href = 'deva-ai.html';
+});
+
+function switchTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (tab==='login'&&i===0)||(tab==='signup'&&i===1)));
+  document.getElementById('panel-login').classList.toggle('active', tab==='login');
+  document.getElementById('panel-signup').classList.toggle('active', tab==='signup');
+  hideErrs();
+}
+
+function selectPlan(plan, el) {
+  selectedPlan = plan;
+  document.querySelectorAll('.plan-opt').forEach(o => o.classList.remove('sel'));
+  el.classList.add('sel');
+  el.querySelector('input[type=radio]').checked = true;
+
+  const btn = document.getElementById('signup-btn');
+  if (plan === 'free') btn.textContent = '✦  Create Free Account  ✦';
+  else if (plan === 'sadhaka') btn.textContent = '✦  Create Account & Pay ₹199  ✦';
+  else btn.textContent = '✦  Create Account & Pay ₹499  ✦';
+}
+
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display = 'block';
+}
+function showSuccess(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display = 'block';
+}
+function hideErrs() {
+  ['login-err','login-success','signup-err','signup-success'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+}
+
+function showLoader(text) {
+  document.getElementById('load-text').textContent = text;
+  document.getElementById('loader').classList.add('show');
+}
+function hideLoader() { document.getElementById('loader').classList.remove('show'); }
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── GOOGLE AUTH (mock — integrate Firebase for real) ──
+function googleAuth() {
+  showLoader('Connecting with Google…');
+  setTimeout(() => {
+    hideLoader();
+    // Mock Google user
+    const user = {
+      id: 'google_' + Date.now(),
+      name: 'Devotee User',
+      email: 'user@gmail.com',
+      plan: 'free',
+      joined: new Date().toISOString(),
+      questionsToday: 0,
+      lastQuestionDate: '',
+      bookmarks: [],
+      isAdmin: false
+    };
+    loginSuccess(user);
+  }, 1500);
+}
+
+// ── LOGIN ──
+function loginUser() {
+  hideErrs();
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  if (!email || !pass) return showErr('login-err', 'Please fill all fields.');
+  if (!email.includes('@')) return showErr('login-err', 'Please enter a valid email address.');
+
+  showLoader('Signing you in…');
+  setTimeout(() => {
+    const users = getUsers();
+    const user = users[email];
+    if (!user) { hideLoader(); return showErr('login-err', 'No account found. Please create one.'); }
+    if (user.password !== btoa(pass)) { hideLoader(); return showErr('login-err', 'Incorrect password.'); }
+    loginSuccess(user);
+  }, 800);
+}
+
+function forgotPassword() {
+  const email = document.getElementById('login-email').value.trim();
+  if (!email) return showErr('login-err', 'Enter your email above first.');
+  showSuccess('login-success', `Password reset instructions would be sent to ${email}. (Integrate email service like Resend/SendGrid for production)`);
+}
+
+// ── SIGNUP ──
+function signupUser() {
+  hideErrs();
+  const fname = document.getElementById('signup-fname').value.trim();
+  const lname = document.getElementById('signup-lname').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const pass = document.getElementById('signup-pass').value;
+
+  if (!fname || !email || !pass) return showErr('signup-err', 'Please fill all required fields.');
+  if (!email.includes('@')) return showErr('signup-err', 'Please enter a valid email.');
+  if (pass.length < 8) return showErr('signup-err', 'Password must be at least 8 characters.');
+
+  const users = getUsers();
+  if (users[email]) return showErr('signup-err', 'An account with this email already exists. Please sign in.');
+
+  if (selectedPlan !== 'free') {
+    initiatePayment(fname, lname, email, pass);
+  } else {
+    createAccount(fname, lname, email, pass, 'free');
+  }
+}
+
+// ── RAZORPAY PAYMENT ──
+function initiatePayment(fname, lname, email, pass) {
+  const plan = selectedPlan;
+  const amount = PLAN_PRICES[plan];
+
+  const options = {
+    key: RAZORPAY_KEY,
+    amount: amount,
+    currency: 'INR',
+    name: 'Deva AI',
+    description: plan === 'sadhaka' ? 'Sadhaka Plan – Monthly' : 'Guru Plan – Monthly',
+    image: '',
+    handler: function(response) {
+      // Payment success
+      createAccount(fname, lname, email, pass, plan, response.razorpay_payment_id);
+    },
+    prefill: { name: fname + ' ' + lname, email: email },
+    notes: { plan: plan },
+    theme: { color: '#e8720c' },
+    modal: {
+      ondismiss: function() { showErr('signup-err', 'Payment cancelled. Your account was not created.'); }
+    }
+  };
+
+  // If Razorpay key not set, skip payment for demo
+  if (RAZORPAY_KEY === 'YOUR_RAZORPAY_KEY') {
+    showToast('Demo: Razorpay key not set — creating account with plan');
+    createAccount(fname, lname, email, pass, plan, 'demo_payment_' + Date.now());
+    return;
+  }
+
+  const rzp = new Razorpay(options);
+  rzp.on('payment.failed', (r) => showErr('signup-err', 'Payment failed: ' + r.error.description));
+  rzp.open();
+}
+
+function createAccount(fname, lname, email, pass, plan, paymentId = null) {
+  showLoader('Creating your account…');
+  setTimeout(() => {
+    const users = getUsers();
+    const user = {
+      id: 'u_' + Date.now(),
+      name: fname + ' ' + lname,
+      email: email,
+      password: btoa(pass),
+      plan: plan,
+      paymentId: paymentId,
+      joined: new Date().toISOString(),
+      questionsToday: 0,
+      lastQuestionDate: '',
+      totalQuestions: 0,
+      bookmarks: [],
+      isAdmin: email === 'admin@devaai.com', // set admin
+      apiKey: ''
+    };
+    users[email] = user;
+    saveUsers(users);
+
+    // Update admin stats
+    const stats = JSON.parse(localStorage.getItem('deva_admin_stats') || '{"totalUsers":0,"totalQuestions":0,"revenue":0}');
+    stats.totalUsers++;
+    if (plan === 'sadhaka') stats.revenue += 199;
+    if (plan === 'guru') stats.revenue += 499;
+    localStorage.setItem('deva_admin_stats', JSON.stringify(stats));
+
+    loginSuccess(user);
+  }, 600);
+}
+
+function loginSuccess(user) {
+  hideLoader();
+  localStorage.setItem('deva_current_user', JSON.stringify(user));
+  showToast('🪔 Welcome ' + user.name.split(' ')[0] + '!');
+  setTimeout(() => {
+    if (user.isAdmin) window.location.href = 'deva-admin.html';
+    else window.location.href = 'deva-ai.html';
+  }, 800);
+}
+
+// Enter key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('panel-login').classList.contains('active')) loginUser();
+    else signupUser();
+  }
+});
+</script>
+</body>
+</html>
